@@ -20,10 +20,15 @@ add_executable(test_handle examples/test_shader_handler.cpp)
 target_link_libraries(test_handle PUBLIC gl_proj)
 message(STATUS ${shaders})
 
-add_custom_target(force_shaders)
+add_executable(test_glm examples/test_glm.cpp)
+target_link_libraries(test_glm PUBLIC gl_proj)
 
 file(GLOB_RECURSE shaders "shaders/*.cc")
+add_custom_target(force_shaders DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/fake.h)
+
 add_custom_command(
-        TARGET test_handle force_shaders POST_BUILD
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fake.h
         COMMAND ${CMAKE_COMMAND} -E copy  ${shaders} "${CMAKE_CURRENT_BINARY_DIR}/"
 )
+
+# TESTd

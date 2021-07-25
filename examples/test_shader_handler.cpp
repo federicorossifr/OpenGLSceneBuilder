@@ -10,11 +10,13 @@
 #include <VertexHandler.h>
 #include <cmath>
 #include <iostream>
-
+#include <glm/glm.hpp>
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+std::vector<float> state;
+ShaderHandler* tri_shader;
 
 void processInput(GLFWwindow *window)
 {
@@ -57,8 +59,7 @@ int main()
         return -1;
     }
 
-
-    ShaderHandler tri_shader("Triangle.vertex.cc","Triangle.fragment.cc");
+    tri_shader = new ShaderHandler("Triangle.vertex.cc","Triangle.fragment.cc");
     std::vector<float> v = {
             0.5f,  -0.5f, 0.0f,
             -0.5f, -0.5f, 0.0f,
@@ -70,7 +71,7 @@ int main()
 
     VertexHandler triangle(std::move(v),std::move(indices));
 
-    glfwSetMouseButtonCallback(window,[](GLFWwindow* window, int button, int action, int mods){
+    glfwSetMouseButtonCallback(window,[](GLFWwindow* window, int button, int action, int mods) -> void{
         double x,y;
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             glfwGetCursorPos(window, &x, &y);
@@ -87,9 +88,9 @@ int main()
 
         processInput(window);
         float offset = glfwGetTime();
-        float offsetVal = (std::sin(offset) / 2.0f) ;
-        tri_shader.setScalarUniform<float>("offset",offsetVal);
-        tri_shader.useShader();
+        float offsetVal = (std::sin(offset) / 2.0f);
+        tri_shader->setScalarUniform<float>("offset",offsetVal);
+        tri_shader->useShader();
         triangle.draw();
         glfwSwapBuffers(window);
         glfwPollEvents();

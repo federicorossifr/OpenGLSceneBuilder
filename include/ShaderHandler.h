@@ -9,8 +9,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
-
+#include <vector>
+#include <glm/glm.hpp>
 
 class ShaderHandler {
 public:
@@ -25,4 +25,10 @@ public:
 
     template<typename UniformType>
     void setScalarUniform(const std::string &name, UniformType value) const;
+
+    template<typename UniformVecType>
+    void setVec3Uniform(const std::string &name, std::vector<UniformVecType> value) const;
+
+    void applyMat(const std::string &name, glm::mat4 mat) const;
+    void applyVec4(const std::string &name,glm::vec4 vec) const;
 };

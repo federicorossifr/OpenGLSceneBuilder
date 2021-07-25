@@ -90,6 +90,28 @@ void ShaderHandler::setScalarUniform(const std::string& name, UniformType value)
         glUniform1i(glGetUniformLocation(this->shaderProgramId, name.c_str()), (int)value);
 }
 
+template<typename UniformVecType>
+void ShaderHandler::setVec3Uniform(const std::string &name, std::vector<UniformVecType> value) const {
+    int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
+    if constexpr(std::is_same<UniformVecType,float>::value)
+        glUniform3f(loc, value[0],value[1],value[2]);
+    if constexpr(std::is_same<UniformVecType,bool>::value || std::is_same<UniformVecType,int>::value)
+        glUniform3i(loc, (int)value[0],(int)value[1],(int)value[2]);
+}
+
+void ShaderHandler::applyMat(const std::string &name, glm::mat4 mat) const {
+    int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
+    glUniformMatrix4fv(loc,1,false,(float*)&mat);
+}
+
+void ShaderHandler::applyVec4(const std::string &name, glm::vec4 vec) const {
+    int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
+    glUniform4fv(loc,1,(float*)&vec);
+}
+
 template void ShaderHandler::setScalarUniform<float>(const std::string& name, float value) const;
 template void ShaderHandler::setScalarUniform<int>(const std::string& name, int value) const;
 template void ShaderHandler::setScalarUniform<bool>(const std::string& name, bool value) const;
+template void ShaderHandler::setVec3Uniform<float>(const std::string& name, std::vector<float> value) const;
+template void ShaderHandler::setVec3Uniform<int>(const std::string& name, std::vector<int> value) const;
+template void ShaderHandler::setVec3Uniform<bool>(const std::string& name, std::vector<bool> value) const;
