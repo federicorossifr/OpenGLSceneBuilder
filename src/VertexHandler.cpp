@@ -5,7 +5,7 @@
 #include <VertexHandler.h>
 
 VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices):
-    numIndices(indices.size()),numVertices(sizeof(vertices)) {
+    numIndices(indices.size()) {
     glGenVertexArrays(1, &vertexAttributeObject);
     glGenBuffers(1, &vertexBufferObject);
     glGenBuffers(1, &eBufferObject);
@@ -19,22 +19,33 @@ VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     glEnableVertexAttribArray(0);
 
     // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(offsetof(Vertex,colour)));
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex,colour)));
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
 }
 
 void VertexHandler::draw() const {
+    if(textureId.has_value()) {
+        glBindTexture(GL_TEXTURE_2D, textureId.value());
+    }
+
     glBindVertexArray(vertexAttributeObject);
-    if(numIndices > 0) glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0); // MULTIPLE VERTEX TRIANGLES
-    else glDrawArrays(GL_TRIANGLES,0,3); // SINGLE VERTEX TRIANGLE
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
+
+void VertexHandler::bindTexture(std::string&& filename) {
+    TextureImage txt(filename);
+    textureId = txt.textureId;
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex,textureCoordinates)));
+    glEnableVertexAttribArray(2);
+}
+
+
+
 
 

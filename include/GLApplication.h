@@ -23,10 +23,17 @@ protected:
     std::vector<RenderableObject> objects;
     Camera camera;
     ApplicationParams applicationParams;
+    struct {
+        float frameDeltaTime;
+        float lastFrameTime;
+        glm::vec2 lastMousePosition;
+        bool isFirstMouseMovement;
+    } status;
     void setupGLAD();
     void setupWindow(ApplicationParams& params);
     void renderLoop();
     void processKeyboardInput();
+    void setProcessMouseCallback();
 
 
 public:

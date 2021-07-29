@@ -5,13 +5,14 @@
 #include <functional>
 #include "GLApplication.h"
 
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
-float lastX = 800 / 2.0f;
-float lastY = 600 / 2.0f;
-bool firstMouse = true;
+
 
 GLApplication::GLApplication(ApplicationParams& params): applicationParams(params), camera((glm::vec3(0.0f, 0.0f, 3.0f))) {
+    status.frameDeltaTime = 0.f;
+    status.lastFrameTime = 0.f;
+    status.lastMousePosition = glm::vec2(params.screenWidth/2.f,params.screenHeight/2.f);
+    status.isFirstMouseMovement = true;
+
     std::cout << "Setting up window" << std::endl;
     setupWindow(params);
     std::cout << "Setting up GLAD" << std::endl;
@@ -43,7 +44,9 @@ void GLApplication::setupWindow(ApplicationParams& params) {
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     });
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    setProcessMouseCallback();
 }
 
 void GLApplication::renderLoop() {
@@ -51,26 +54,25 @@ void GLApplication::renderLoop() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
-        // ToDo somemhow handle inputs
         glfwPollEvents();
         float time = glfwGetTime();
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        status.frameDeltaTime = time - status.lastFrameTime;
+        status.lastFrameTime = time;
         processKeyboardInput();
 
         auto rot = glm::rotate(glm::mat4(1.f),glm::radians(90.f),glm::vec3(1.f,0.f,0.));
-        auto persp = glm::perspective(glm::radians(45.f), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
+        auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
         for(const auto& obj: objects) {
-            obj.shaderHandler->applyMat("model",rot*glm::rotate(glm::mat4(1.f),time*glm::radians(45.f),glm::vec3(0.f,0.f,1.)));
+            obj.shaderHandler->useShader();
+            obj.shaderHandler->applyMat("model",rot*obj.objectModel(time));
             obj.shaderHandler->applyMat("projection",persp);
             obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-
-            obj.shaderHandler->useShader();
             obj.vertexHandler->draw();
+            glUseProgram(0);
         }
         glfwSwapBuffers(window);
     }
+    glfwTerminate();
 }
 
 void GLApplication::run() {
@@ -86,15 +88,47 @@ void GLApplication::processKeyboardInput() {
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(FORWARD, status.frameDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, status.frameDeltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(RIGHT, status.frameDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, status.frameDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.ProcessKeyboard(UP, status.frameDeltaTime);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWN, status.frameDeltaTime);
+}
+
+void GLApplication::setProcessMouseCallback() {
+    glfwSetCursorPosCallback(window,[](GLFWwindow* window, double xpos, double ypos) {
+        auto app = reinterpret_cast<GLApplication*>(glfwGetWindowUserPointer(window));
+        if (app->status.isFirstMouseMovement)
+        {
+            app->status.lastMousePosition.x = xpos;
+            app->status.lastMousePosition.y = ypos;
+            app->status.isFirstMouseMovement = false;
+        }
+
+        float xoffset = xpos - app->status.lastMousePosition.x;
+        float yoffset = app->status.lastMousePosition.y - ypos; // reversed since y-coordinates go from bottom to top
+
+        app->status.lastMousePosition.x = xpos;
+        app->status.lastMousePosition.y = ypos;
+
+        app->camera.ProcessMouseMovement(xoffset, yoffset);
+    });
+
+    glfwSetScrollCallback(window,[](GLFWwindow* window, double xoffset, double yoffset) {
+        auto app = reinterpret_cast<GLApplication*>(glfwGetWindowUserPointer(window));
+        std::cout << " Scroll " << yoffset;
+        app->camera.ProcessMouseScroll(yoffset);
+    });
 
 }
+
+
 
 
 
