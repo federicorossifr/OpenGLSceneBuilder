@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(opengl_test)
 
 set(CMAKE_CXX_STANDARD 17)
+set(GLSL_COMPILER "C:/VulkanSDK/1.2.182.0/Bin/glslangValidator.exe")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
@@ -18,17 +19,33 @@ target_link_libraries(oth PUBLIC gl_proj)
 
 add_executable(test_handle examples/test_shader_handler.cpp)
 target_link_libraries(test_handle PUBLIC gl_proj)
-message(STATUS ${shaders})
 
 add_executable(test_glm examples/test_glm.cpp)
 target_link_libraries(test_glm PUBLIC gl_proj)
 
-file(GLOB_RECURSE shaders "shaders/*.cc")
-add_custom_target(force_shaders DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/fake.h)
+add_executable(test_encaps_glapp examples/test_encaps_glapp.cpp)
+target_link_libraries(test_encaps_glapp PUBLIC gl_proj)
 
-add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fake.h
-        COMMAND ${CMAKE_COMMAND} -E copy  ${shaders} "${CMAKE_CURRENT_BINARY_DIR}/"
+add_executable(vkApp_3_static examples/test_encaps_glapp.cpp ${proj_srcs})
+target_link_libraries(vkApp_3_static PUBLIC glu32 glfw3 -static)
+target_compile_options(vkApp_3_static PUBLIC -static-libgcc -static-libstdc++ )
+target_link_libraries(vkApp_3_static PUBLIC  -static-libgcc -static-libstdc++ -static)
+
+file(GLOB_RECURSE shaders "shaders/*.vert" "shaders/*.frag" )
+foreach(GLSL  ${shaders})
+    get_filename_component(FILE_NAME ${GLSL} NAME)
+    set(SPIRV "${PROJECT_BINARY_DIR}/shaders/${FILE_NAME}.spv")
+    add_custom_command(
+            OUTPUT ${SPIRV}
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/shaders/"
+            COMMAND ${CMAKE_COMMAND} -E copy ${GLSL} ${SPIRV}
+            DEPENDS ${GLSL})
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach(GLSL)
+
+add_custom_target(
+        Shaders
+        DEPENDS ${SPIRV_BINARY_FILES}
 )
 
 # TESTd

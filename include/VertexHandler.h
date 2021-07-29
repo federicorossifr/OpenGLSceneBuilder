@@ -10,6 +10,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <Vertex.h>
 class VertexHandler {
 public:
     unsigned int vertexBufferObject;
@@ -17,14 +18,14 @@ public:
     unsigned int eBufferObject;
     const size_t numVertices,numIndices;
 
-    VertexHandler(std::vector<float>&& vertices,std::vector<unsigned int>&& indices);
+    VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
     ~VertexHandler() {
         glDeleteVertexArrays(1, &vertexAttributeObject);
         glDeleteBuffers(1, &vertexBufferObject);
         glDeleteBuffers(1, &eBufferObject);
     }
-    void draw();
+    void draw() const;
 
 
 };

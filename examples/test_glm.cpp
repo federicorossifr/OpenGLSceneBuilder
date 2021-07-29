@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
 #include <glm/ext/scalar_constants.hpp> // glm::pi
+#include <glm/gtc/matrix_transform.hpp>
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -92,7 +93,8 @@ int main()
         return -1;
     }
 
-    tri_shader = new ShaderHandler("TrianglePos.vertex.cc","Triangle.fragment.cc");
+    tri_shader = new ShaderHandler("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv");
+
     std::vector<float> v = {
             0.0f,  0.5f, 0.0f,
             -0.5f, 0.f, 0.0f,
@@ -144,12 +146,9 @@ int main()
 
         float offset = glfwGetTime();
         float alpha = glm::radians(100*offset);
-        glm::mat4 rot2D(
-                glm::cos(alpha),-glm::sin(alpha),0,0,
-                glm::sin(alpha),glm::cos(alpha),0,0,
-                0,0,1,0,
-                0,0,0,1
-        );
+
+        glm::mat4 rot2D = glm::mat4(1.0f);
+        rot2D = glm::rotate(rot2D, alpha, glm::vec3(0.0, 0.0, 1.0));
 
         tri_shader->applyMat("rotation",rot2D);
         tri_shader->applyVec4("translation",trasl4D);

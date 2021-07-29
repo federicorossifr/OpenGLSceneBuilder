@@ -78,8 +78,8 @@ ShaderHandler::ShaderHandler(std::string&& vertexFile, std::string&& fragmentFil
     this->shaderProgramId = compileShaderFromSource(vertexCode.c_str(),fragmentCode.c_str());
 }
 
-void ShaderHandler::useShader() {
-    glUseProgram(this->shaderProgramId);
+void ShaderHandler::useShader() const {
+    glUseProgram(shaderProgramId);
 }
 
 template<typename UniformType>

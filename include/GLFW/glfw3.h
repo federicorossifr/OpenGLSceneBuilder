@@ -58,7 +58,7 @@ extern "C" {
  *  This is the reference documentation for Vulkan related functions and types.
  *  For more task-oriented information, see the @ref vulkan_guide.
  */
-/*! @defgroup init Initialization, version and error reference
+/*! @defgroup initialize Initialization, version and error reference
  *  @brief Functions and types related to initialization and error handling.
  *
  *  This is the reference documentation for initialization and termination of
@@ -279,21 +279,21 @@ extern "C" {
 /*! @brief The major version number of the GLFW library.
  *
  *  This is incremented when the API is changed in non-compatible ways.
- *  @ingroup init
+ *  @ingroup initialize
  */
 #define GLFW_VERSION_MAJOR          3
 /*! @brief The minor version number of the GLFW library.
  *
  *  This is incremented when features are added to the API but it remains
  *  backward-compatible.
- *  @ingroup init
+ *  @ingroup initialize
  */
 #define GLFW_VERSION_MINOR          3
 /*! @brief The revision number of the GLFW library.
  *
  *  This is incremented when a bug fix release is made that does not contain any
  *  API changes.
- *  @ingroup init
+ *  @ingroup initialize
  */
 #define GLFW_VERSION_REVISION       4
 /*! @} */
@@ -304,7 +304,7 @@ extern "C" {
  *  `true` or `_True` or `GL_TRUE` or `VK_TRUE` or anything else that is equal
  *  to one.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 #define GLFW_TRUE                   1
 /*! @brief Zero.
@@ -313,7 +313,7 @@ extern "C" {
  *  `false` or `_False` or `GL_FALSE` or `VK_FALSE` or anything else that is
  *  equal to zero.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 #define GLFW_FALSE                  0
 
@@ -656,7 +656,7 @@ extern "C" {
  *
  *  See [error handling](@ref error_handling) for how these are used.
  *
- *  @ingroup init
+ *  @ingroup initialize
  *  @{ */
 /*! @brief No error has occurred.
  *
@@ -1103,21 +1103,21 @@ extern "C" {
 #define GLFW_CONNECTED              0x00040001
 #define GLFW_DISCONNECTED           0x00040002
 
-/*! @addtogroup init
+/*! @addtogroup initialize
  *  @{ */
-/*! @brief Joystick hat buttons init hint.
+/*! @brief Joystick hat buttons initialize hint.
  *
- *  Joystick hat buttons [init hint](@ref GLFW_JOYSTICK_HAT_BUTTONS).
+ *  Joystick hat buttons [initialize hint](@ref GLFW_JOYSTICK_HAT_BUTTONS).
  */
 #define GLFW_JOYSTICK_HAT_BUTTONS   0x00050001
-/*! @brief macOS specific init hint.
+/*! @brief macOS specific initialize hint.
  *
- *  macOS specific [init hint](@ref GLFW_COCOA_CHDIR_RESOURCES_hint).
+ *  macOS specific [initialize hint](@ref GLFW_COCOA_CHDIR_RESOURCES_hint).
  */
 #define GLFW_COCOA_CHDIR_RESOURCES  0x00051001
-/*! @brief macOS specific init hint.
+/*! @brief macOS specific initialize hint.
  *
- *  macOS specific [init hint](@ref GLFW_COCOA_MENUBAR_hint).
+ *  macOS specific [initialize hint](@ref GLFW_COCOA_MENUBAR_hint).
  */
 #define GLFW_COCOA_MENUBAR          0x00051002
 /*! @} */
@@ -1213,7 +1213,7 @@ typedef struct GLFWcursor GLFWcursor;
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 typedef void (* GLFWerrorfun)(int,const char*);
 
@@ -1776,7 +1776,7 @@ typedef struct GLFWgamepadstate
  *  @remark @macos This function will change the current directory of the
  *  application to the `Contents/Resources` subdirectory of the application's
  *  bundle, if present.  This can be disabled with the @ref
- *  GLFW_COCOA_CHDIR_RESOURCES init hint.
+ *  GLFW_COCOA_CHDIR_RESOURCES initialize hint.
  *
  *  @remark @x11 This function will set the `LC_CTYPE` category of the
  *  application locale according to the current environment if that category is
@@ -1789,7 +1789,7 @@ typedef struct GLFWgamepadstate
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI int glfwInit(void);
 
@@ -1823,11 +1823,11 @@ GLFWAPI int glfwInit(void);
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI void glfwTerminate(void);
 
-/*! @brief Sets the specified init hint to the desired value.
+/*! @brief Sets the specified initialize hint to the desired value.
  *
  *  This function sets hints for the next initialization of GLFW.
  *
@@ -1840,8 +1840,8 @@ GLFWAPI void glfwTerminate(void);
  *  will only affect their specific platform.  Other platforms will ignore them.
  *  Setting these hints requires no platform specific headers or functions.
  *
- *  @param[in] hint The [init hint](@ref init_hints) to set.
- *  @param[in] value The new value of the init hint.
+ *  @param[in] hint The [initialize hint](@ref init_hints) to set.
+ *  @param[in] value The new value of the initialize hint.
  *
  *  @errors Possible errors include @ref GLFW_INVALID_ENUM and @ref
  *  GLFW_INVALID_VALUE.
@@ -1855,7 +1855,7 @@ GLFWAPI void glfwTerminate(void);
  *
  *  @since Added in version 3.3.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI void glfwInitHint(int hint, int value);
 
@@ -1882,7 +1882,7 @@ GLFWAPI void glfwInitHint(int hint, int value);
  *
  *  @since Added in version 1.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev);
 
@@ -1913,7 +1913,7 @@ GLFWAPI void glfwGetVersion(int* major, int* minor, int* rev);
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI const char* glfwGetVersionString(void);
 
@@ -1944,7 +1944,7 @@ GLFWAPI const char* glfwGetVersionString(void);
  *
  *  @since Added in version 3.3.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI int glfwGetError(const char** description);
 
@@ -1990,7 +1990,7 @@ GLFWAPI int glfwGetError(const char** description);
  *
  *  @since Added in version 3.0.
  *
- *  @ingroup init
+ *  @ingroup initialize
  */
 GLFWAPI GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun callback);
 
@@ -2629,7 +2629,7 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *  bar.  Otherwise a minimal menu bar is created manually with common commands
  *  like Hide, Quit and About.  The About entry opens a minimal about dialog
  *  with information from the application's bundle.  Menu bar creation can be
- *  disabled entirely with the @ref GLFW_COCOA_MENUBAR init hint.
+ *  disabled entirely with the @ref GLFW_COCOA_MENUBAR initialize hint.
  *
  *  @remark @macos On OS X 10.10 and later the window frame will not be rendered
  *  at full resolution on Retina displays unless the
@@ -4899,7 +4899,7 @@ GLFWAPI const float* glfwGetJoystickAxes(int jid, int* count);
  *  represented as four buttons.  The hats are in the same order as returned by
  *  __glfwGetJoystickHats__ and are in the order _up_, _right_, _down_ and
  *  _left_.  To disable these extra buttons, set the @ref
- *  GLFW_JOYSTICK_HAT_BUTTONS init hint before initialization.
+ *  GLFW_JOYSTICK_HAT_BUTTONS initialize hint before initialization.
  *
  *  If the specified joystick is not present this function will return `NULL`
  *  but will not generate an error.  This can be used instead of first calling

@@ -21,7 +21,7 @@ public:
 
     ~ShaderHandler() { glDeleteShader(shaderProgramId); }
 
-    void useShader();
+    void useShader() const;
 
     template<typename UniformType>
     void setScalarUniform(const std::string &name, UniformType value) const;
