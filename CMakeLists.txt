@@ -26,10 +26,17 @@ target_link_libraries(test_glm PUBLIC gl_proj)
 add_executable(test_encaps_glapp examples/test_encaps_glapp.cpp)
 target_link_libraries(test_encaps_glapp PUBLIC gl_proj)
 
-add_executable(vkApp_3_static examples/test_encaps_glapp.cpp ${proj_srcs})
-target_link_libraries(vkApp_3_static PUBLIC glu32 glfw3 -static)
-target_compile_options(vkApp_3_static PUBLIC -static-libgcc -static-libstdc++ )
-target_link_libraries(vkApp_3_static PUBLIC  -static-libgcc -static-libstdc++ -static)
+add_executable(random_cubes examples/randomCubes.cpp)
+target_link_libraries(random_cubes PUBLIC gl_proj)
+
+add_executable(lighting examples/lighting.cpp)
+target_link_libraries(lighting PUBLIC gl_proj)
+
+
+add_executable(debug_static examples/lighting.cpp ${proj_srcs})
+target_link_libraries(debug_static PUBLIC glu32 glfw3 -static)
+target_compile_options(debug_static PUBLIC -static-libgcc -static-libstdc++ )
+target_link_libraries(debug_static PUBLIC  -static-libgcc -static-libstdc++ -static)
 
 file(GLOB_RECURSE shaders "shaders/*.vert" "shaders/*.frag" )
 foreach(GLSL  ${shaders})

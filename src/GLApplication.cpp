@@ -60,13 +60,13 @@ void GLApplication::renderLoop() {
         status.lastFrameTime = time;
         processKeyboardInput();
 
-        auto rot = glm::rotate(glm::mat4(1.f),glm::radians(90.f),glm::vec3(1.f,0.f,0.));
         auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
         for(const auto& obj: objects) {
             obj.shaderHandler->useShader();
-            obj.shaderHandler->applyMat("model",rot*obj.objectModel(time));
+            obj.shaderHandler->applyMat("model",obj.objectModel(time));
             obj.shaderHandler->applyMat("projection",persp);
             obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
+            if(obj.postModelFun) obj.postModel(time);
             obj.vertexHandler->draw();
             glUseProgram(0);
         }

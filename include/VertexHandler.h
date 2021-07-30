@@ -25,7 +25,7 @@ public:
     VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
     void bindTexture(std::string&& filename);
-
+    void bindNormal();
     ~VertexHandler() {
         glDeleteVertexArrays(1, &vertexAttributeObject);
         glDeleteBuffers(1, &vertexBufferObject);

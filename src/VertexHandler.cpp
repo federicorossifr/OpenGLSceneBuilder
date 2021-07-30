@@ -45,6 +45,11 @@ void VertexHandler::bindTexture(std::string&& filename) {
     glEnableVertexAttribArray(2);
 }
 
+void VertexHandler::bindNormal() {
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex,normal)));
+    glEnableVertexAttribArray(3);
+}
+
 
 
 

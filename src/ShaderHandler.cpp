@@ -99,6 +99,11 @@ void ShaderHandler::setVec3Uniform(const std::string &name, std::vector<UniformV
         glUniform3i(loc, (int)value[0],(int)value[1],(int)value[2]);
 }
 
+void ShaderHandler::setVec3Uniform(const std::string &name, glm::vec3 vec ) const {
+    int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
+    glUniform3f(loc, vec.x, vec.y, vec.z);
+}
+
 void ShaderHandler::applyMat(const std::string &name, glm::mat4 mat) const {
     int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
     glUniformMatrix4fv(loc,1,false,(float*)&mat);
