@@ -20,11 +20,11 @@ public:
     unsigned int vertexAttributeObject;
     unsigned int eBufferObject;
     const size_t numIndices;
-    std::optional<unsigned int> textureId;
+    std::vector<unsigned int> textureIds;
 
     VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
-    void bindTexture(std::string&& filename);
+    void bindTexture(std::string&& filename,bool hasAlpha = false);
     void bindNormal();
     ~VertexHandler() {
         glDeleteVertexArrays(1, &vertexAttributeObject);

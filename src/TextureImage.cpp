@@ -6,7 +6,7 @@
 #include <TextureImage.h>
 
 
-TextureImage::TextureImage(std::string &filename):textureId(-1) {
+TextureImage::TextureImage(std::string &filename,bool hasAlpha):textureId(-1) {
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
         // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -19,7 +19,11 @@ TextureImage::TextureImage(std::string &filename):textureId(-1) {
         unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            if(hasAlpha)
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            else
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
             glGenerateMipmap(GL_TEXTURE_2D);
         }
         else

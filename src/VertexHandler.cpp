@@ -3,6 +3,8 @@
 //
 
 #include <VertexHandler.h>
+#include <algorithm>
+#include <array>
 
 VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices):
     numIndices(indices.size()) {
@@ -29,20 +31,65 @@ VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned
 
 }
 
+const std::array<GLuint ,32> glTextureMap
+{
+    GL_TEXTURE0,
+    GL_TEXTURE1,
+    GL_TEXTURE2,
+    GL_TEXTURE3,
+    GL_TEXTURE4,
+    GL_TEXTURE5,
+    GL_TEXTURE6,
+    GL_TEXTURE7,
+    GL_TEXTURE8,
+    GL_TEXTURE9,
+    GL_TEXTURE10,
+    GL_TEXTURE11,
+    GL_TEXTURE12,
+    GL_TEXTURE13,
+    GL_TEXTURE14,
+    GL_TEXTURE15,
+    GL_TEXTURE16,
+    GL_TEXTURE17,
+    GL_TEXTURE18,
+    GL_TEXTURE19,
+    GL_TEXTURE20,
+    GL_TEXTURE21,
+    GL_TEXTURE22,
+    GL_TEXTURE23,
+    GL_TEXTURE24,
+    GL_TEXTURE25,
+    GL_TEXTURE26,
+    GL_TEXTURE27,
+    GL_TEXTURE28,
+    GL_TEXTURE29,
+    GL_TEXTURE30,
+    GL_TEXTURE31
+};
+
 void VertexHandler::draw() const {
-    if(textureId.has_value()) {
-        glBindTexture(GL_TEXTURE_2D, textureId.value());
-    }
+    std::for_each(textureIds.begin(),textureIds.end(),[idx=0] (auto& textureId) mutable {
+        glActiveTexture(glTextureMap.at(idx));
+        glBindTexture(GL_TEXTURE_2D, textureId);
+        idx++;
+    });
+
 
     glBindVertexArray(vertexAttributeObject);
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+    if(numIndices > 0)
+        glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
+    else
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void VertexHandler::bindTexture(std::string&& filename) {
-    TextureImage txt(filename);
-    textureId = txt.textureId;
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex,textureCoordinates)));
-    glEnableVertexAttribArray(2);
+void VertexHandler::bindTexture(std::string&& filename, bool hasAlpha) {
+    TextureImage txt(filename,hasAlpha);
+    textureIds.push_back(txt.textureId);
+
+    if(textureIds.size() == 1) { // only first time binding a texture
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex,textureCoordinates)));
+        glEnableVertexAttribArray(2);
+    }
 }
 
 void VertexHandler::bindNormal() {

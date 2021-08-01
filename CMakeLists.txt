@@ -32,8 +32,10 @@ target_link_libraries(random_cubes PUBLIC gl_proj)
 add_executable(lighting examples/lighting.cpp)
 target_link_libraries(lighting PUBLIC gl_proj)
 
+add_executable(lighting2 examples/lighting2.cpp)
+target_link_libraries(lighting2 PUBLIC gl_proj)
 
-add_executable(debug_static examples/lighting.cpp ${proj_srcs})
+add_executable(debug_static examples/lighting2.cpp ${proj_srcs})
 target_link_libraries(debug_static PUBLIC glu32 glfw3 -static)
 target_compile_options(debug_static PUBLIC -static-libgcc -static-libstdc++ )
 target_link_libraries(debug_static PUBLIC  -static-libgcc -static-libstdc++ -static)

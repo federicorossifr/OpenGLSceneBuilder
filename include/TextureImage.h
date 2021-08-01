@@ -10,5 +10,5 @@ class TextureImage {
 public:
     unsigned int textureId;
 
-    explicit TextureImage(std::string& filename);
+    explicit TextureImage(std::string& filename,bool hasAlpha);
 };

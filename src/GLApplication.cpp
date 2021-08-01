@@ -7,7 +7,7 @@
 
 
 
-GLApplication::GLApplication(ApplicationParams& params): applicationParams(params), camera((glm::vec3(0.0f, 0.0f, 3.0f))) {
+GLApplication::GLApplication(ApplicationParams& params): applicationParams(params), camera((glm::vec3(0.0f, 0.f, 3.0f))) {
     status.frameDeltaTime = 0.f;
     status.lastFrameTime = 0.f;
     status.lastMousePosition = glm::vec2(params.screenWidth/2.f,params.screenHeight/2.f);
@@ -66,7 +66,7 @@ void GLApplication::renderLoop() {
             obj.shaderHandler->applyMat("model",obj.objectModel(time));
             obj.shaderHandler->applyMat("projection",persp);
             obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-            if(obj.postModelFun) obj.postModel(time);
+            if(obj.postModelFun) obj.postModel(time,camera);
             obj.vertexHandler->draw();
             glUseProgram(0);
         }

@@ -129,7 +129,7 @@ namespace glTests {
             {-0.5f, 0.5f, -0.5f}
         };
 
-        std::vector<glm::vec3> normals{
+        std::vector<glm::vec3> normals {
                 {0.f,0.f,-1.f},
                 {0.f,0.f,-1.f},
                 {0.f,0.f,-1.f},
@@ -173,14 +173,62 @@ namespace glTests {
                 {0.f,1.f,0.f},
         };
 
+        std::vector<glm::vec2> texCoords {
+            {0.,0.},
+            {1.,0.},
+            {1.,1.},
+            {1.,1.},
+            {0.,1.},
+            {0.,0.},
+
+            {0.,0.},
+            {1.,0.},
+            {1.,1.},
+            {1.,1.},
+            {0.,1.},
+            {0.,0.},
+
+            {1.,0.},
+            {1.,1.},
+            {0.,1.},
+            {0.,1.},
+            {0.,0.},
+            {1.,0.},
+
+            {1.,0.},
+            {1.,1.},
+            {0.,1.},
+            {0.,1.},
+            {0.,0.},
+            {1.,0.},
+
+            {0.,1.},
+            {1.,1.},
+            {1.,0.},
+            {1.,1.},
+            {0.,0.},
+            {0.,1.},
+
+            {0.,1.},
+            {1.,1.},
+            {1.,0.},
+            {1.,0.},
+            {0.,0.},
+            {0.,1.},
+        };
 
 
         std::vector<Vertex> vertices; // We need 8 unique vertices to build the cube => upper and lower faces
-        std::for_each(corners.begin(),corners.end(),[&,n=0](glm::vec3 corner) mutable{
+        std::for_each(corners.begin(),corners.end(),[&,n=0](glm::vec3 corner) mutable {
           auto transCorner = glm::scale(glm::mat4(1.f),glm::vec3(sideLength));
           auto newCorner = transCorner*glm::vec4(corner,1.f);
           auto projCorner = glm::vec3(newCorner.x,newCorner.y,newCorner.z) + origin;
-          vertices.push_back(Vertex{projCorner,{vertexColours[n%8]},{-1.f,-1.f}, normals[n]});
+          vertices.push_back(Vertex{
+              projCorner,
+              vertexColours[n%8],
+              texCoords[n],
+              normals[n]
+          });
           n++;
         });
         std::vector<unsigned int> indices(6*6); // Six indices to connect the vertices of a face * six faces
@@ -188,4 +236,58 @@ namespace glTests {
 
         return std::make_pair(vertices,indices);
     }
+
+    VertexInfo createPlaneWithNormal(
+            const glm::vec3 origin,
+            const glm::float32_t sideLength,
+            const std::array<glm::vec3,8> vertexColours // topRight,topLeft,bottomRight,bottomLeft (RGBA colours)
+            ) {
+
+        std::vector<glm::vec3> corners{
+            {-0.5f, 0., -0.5f},
+            {0.5f, 0., -0.5f},
+            {0.5f, 0., 0.5f},
+            {0.5f, 0., 0.5f},
+            {-0.5f, 0., 0.5f},
+            {-0.5f, 0., -0.5f},
+        };
+
+        std::vector<glm::vec3> normals {
+            {0.f,1.f,0.f},
+            {0.f,1.f,0.f},
+            {0.f,1.f,0.f},
+            {0.f,1.f,0.f},
+            {0.f,1.f,0.f},
+            {0.f,1.f,0.f},
+        };
+
+        std::vector<glm::vec2> texCoords {
+            {0.,1.},
+            {1.,1.},
+            {1.,0.},
+            {1.,1.},
+            {0.,0.},
+            {0.,1.},
+        };
+
+
+        std::vector<Vertex> vertices; // We need 8 unique vertices to build the cube => upper and lower faces
+        std::for_each(corners.begin(),corners.end(),[&,n=0](glm::vec3 corner) mutable {
+            auto transCorner = glm::scale(glm::mat4(1.f),glm::vec3(sideLength));
+            auto newCorner = transCorner*glm::vec4(corner,1.f);
+            auto projCorner = glm::vec3(newCorner.x,newCorner.y,newCorner.z) + origin;
+            vertices.push_back(Vertex{
+                projCorner,
+                vertexColours[n%8],
+                texCoords[n],
+                normals[n]
+            });
+            n++;
+        });
+        std::vector<unsigned int> indices(6*6); // Six indices to connect the vertices of a face * six faces
+        std::iota(indices.begin(),indices.end(),0);
+
+        return std::make_pair(vertices,indices);
+    }
+
 }

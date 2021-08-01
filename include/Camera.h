@@ -1,6 +1,7 @@
 //
 // Created by federico on 28/07/2021.
 //
+#pragma once
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
