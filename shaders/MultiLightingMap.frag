@@ -29,8 +29,20 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };
+
+struct FlashLight {
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
 uniform DirLight dirLight;
 uniform PointLight pointLights[MaxPointLights];
+uniform FlashLight flashLight;
 uniform Material material;
 
 uniform int numPointLights;
@@ -79,6 +91,26 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (ambient + diffuse + specular);
 }
 
+vec3 CalcFlashLight(FlashLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+{
+    vec3 lightDir = normalize(light.position - FragPos);
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = (light.cutOff - light.outerCutOff);
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    // diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    // specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    diffuse  *= intensity;
+    specular *= intensity;
+    return (diffuse + specular);
+}
+
 void main()
 {
     // properties
@@ -92,7 +124,7 @@ void main()
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
 
     // phase 3: Spot light
-    //result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
+    result += CalcFlashLight(flashLight, norm, FragPos, viewDir);
 
     FragColor = vec4(result, 1.0);
 }

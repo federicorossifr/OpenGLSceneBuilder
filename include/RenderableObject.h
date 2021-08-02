@@ -6,6 +6,7 @@
 #include <ShaderHandler.h>
 #include <functional>
 #include "Camera.h"
+#include "GLApplication.h"
 
 struct Material {
     glm::vec3 ambient;
@@ -35,7 +36,18 @@ struct PointLight {
     float quadratic;
 };
 
+struct FlashLight {
+    glm::vec3 position;
+    glm::vec3 direction;
+    LightProperties properties;
 
+    float cutOff;
+    float outerCutOff;
+
+    bool state;
+};
+
+class GLApplication;
 class RenderableObject {
 private:
     const GLuint maxSpotLights{4};
@@ -44,7 +56,7 @@ public:
     VertexHandler* vertexHandler;
     ShaderHandler* shaderHandler;
     std::function<glm::mat4(float)> objModelFun;
-    std::function<void(float,Camera& camera)> postModelFun;
+    std::function<void(float,GLApplication* app)> postModelFun;
 
     RenderableObject(std::string&& vertexFile, std::string&& fragmentFile, std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices) {
         vertexHandler = new VertexHandler(std::move(vertices),std::move(indices));
@@ -52,7 +64,7 @@ public:
     }
 
     glm::mat4 objectModel(float t) const {return objModelFun(t);};
-    void postModel(float t,Camera& cam) const {postModelFun(t,cam);};
+    void postModel(float t,GLApplication* app) const {postModelFun(t,app);};
 
     void setMaterial(Material& mat) {
         if(shaderHandler == nullptr) return;
@@ -76,6 +88,16 @@ public:
         shaderHandler->useShader();
         setIllumination(dir.properties,"dirLight");
         shaderHandler->setVec3Uniform("dirLight.direction",dir.direction);
+    }
+
+    void setFlashLight(FlashLight& fl) {
+        if(shaderHandler == nullptr) return;
+        shaderHandler->useShader();
+        setIllumination(fl.properties,"flashLight");
+        shaderHandler->setVec3Uniform("flashLight.position",fl.position);
+        shaderHandler->setVec3Uniform("flashLight.direction",fl.direction);
+        shaderHandler->setScalarUniform("flashLight.cutOff",fl.cutOff);
+        shaderHandler->setScalarUniform("flashLight.outerCutOff",fl.outerCutOff);
     }
 
     void addPointLight(PointLight& pl) {

@@ -57,10 +57,15 @@ int main()
     PointLight pLight2{pLight};
     pLight2.position = lightPos2;
 
+    FlashLight flashLight{};
+    flashLight.properties = ill;
+    flashLight.cutOff = glm::cos(glm::radians(12.5f));
+    flashLight.outerCutOff = glm::cos(glm::radians(17.5f));
+    flashLight.state = 1;
 
     ApplicationParams params{800,600};
     GLApplication app(params);
-
+    app.putContext("flashLight",flashLight);
     auto cube2 = glTests::createCubeWithNormal({0.f,4.f,0.f},5.f,{R,R,R,R,R,R,R,R});
     RenderableObject obj2("shaders/TextureLightingMap.vert.spv","shaders/MultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
     obj2.setTexture("../textures/metal.jpg",false);
@@ -70,34 +75,16 @@ int main()
     obj2.addPointLight(pLight);
     obj2.addPointLight(pLight2);
     obj2.objModelFun = [](float time) {
-        return glm::rotate(glm::mat4(1.f),time*glm::radians(90.f),glm::vec3(0.,1.,0.));
+        return glm::rotate(glm::mat4(1.f),time*glm::radians(0.f),glm::vec3(0.,1.,0.));
     };
-    obj2.postModelFun = [&](float time,Camera& camera) {
-       obj2.shaderHandler->setVec3Uniform("viewPos",camera.Position);
+    obj2.postModelFun = [&](float time,GLApplication* app) {
+        app->getContext("flashLight",flashLight);
+        flashLight.position = app->camera.Position;
+        flashLight.direction = app->camera.Front;
+        obj2.setFlashLight(flashLight);
+        obj2.shaderHandler->setVec3Uniform("viewPos",app->camera.Position);
     };
     app.addRenderableObject(obj2);
-
-
-
-   /* auto plane = glTests::createPlaneWithNormal({0.f,-.5f,0.f},50.f,{G,G,G,G,G,G,G});
-
-    RenderableObject planeObj{"shaders/TextureLightingMap.vert.spv","shaders/LightingMap.frag.spv",std::move(plane.first),std::move(plane.second)};
-    planeObj.setTexture("../textures/metal2.jpg",false);
-    planeObj.setTexture("../textures/metal2_specular.jpg",false);
-    planeObj.enableNormalAttribute();
-    planeObj.setMaterial(material2);
-    planeObj.setIllumination(ill);
-
-    planeObj.objModelFun = [](float time) {
-        return glm::mat4(1.f);
-    };
-    planeObj.postModelFun = [&](float time,Camera& camera) {
-        planeObj.shaderHandler->setVec3Uniform("light.position", lightPos);
-        planeObj.shaderHandler->setVec3Uniform("viewPos",camera.Position);
-    };*/
-    //app.addRenderableObject(planeObj);
-
-
 
 
     auto lightCube = glTests::createCubeWithNormal({lightPos.x,lightPos.y,lightPos.z},1.f, {W,W,W,W,W,W,W,W});
@@ -114,16 +101,32 @@ int main()
     };
     app.addRenderableObject(light2);
 
-    auto lightCube3 = glTests::createCubeWithNormal(-directional,1.f, {G,G,G,G,G,G,G,G});
-    RenderableObject light3("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube3.first),std::move(lightCube3.second));
-    light3.objModelFun = [&](float time) {
-        return glm::mat4(1.f);
-    };
-    app.addRenderableObject(light3);
+
 
 
 
     glClearColor(0.,0.,0., 1.0f);
+
+    glfwSetMouseButtonCallback(app.getWindowPtr(), [](GLFWwindow* window, int button, int action, int mods){
+        auto* app = reinterpret_cast<GLApplication*>(glfwGetWindowUserPointer(window));
+        FlashLight fl{};
+        app->getContext("flashLight",fl);
+        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && fl.state) {
+            app->putContext("flashLightOld",fl);
+            fl.cutOff = 100.;
+            fl.outerCutOff = 0.;
+            fl.state = 0;
+            app->putContext("flashLight",fl);
+        }
+
+        if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !fl.state) {
+            FlashLight fl{};
+            app->getContext("flashLightOld",fl);
+            app->putContext("flashLight",fl);
+        }
+    });
+
+
     app.run();
     return 0;
 }

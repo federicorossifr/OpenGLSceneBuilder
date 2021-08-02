@@ -16,12 +16,12 @@
 #include <RenderableObject.h>
 #include <functional>
 #include "Camera.h"
-
+#include <any>
+class RenderableObject;
 class GLApplication {
 protected:
     GLFWwindow* window;
     std::vector<RenderableObject> objects;
-    Camera camera;
     ApplicationParams applicationParams;
     struct {
         float frameDeltaTime;
@@ -39,7 +39,23 @@ protected:
 public:
     GLApplication(ApplicationParams& params);
     void addRenderableObject(RenderableObject obj);
+
+
+    std::unordered_map<std::string,std::any> context;
+
+    void putContext(const std::string& key,std::any value) {
+        context[key] = value;
+    }
+
+    template <class T>
+    void getContext(const std::string& key,T& value) {
+        value = std::any_cast<T>(context[key]);
+    }
+
+    GLFWwindow* getWindowPtr();
     void run();
+
+    Camera camera;
 };
 
 

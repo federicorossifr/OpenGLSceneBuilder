@@ -66,7 +66,7 @@ void GLApplication::renderLoop() {
             obj.shaderHandler->applyMat("model",obj.objectModel(time));
             obj.shaderHandler->applyMat("projection",persp);
             obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-            if(obj.postModelFun) obj.postModel(time,camera);
+            if(obj.postModelFun) obj.postModel(time,this);
             obj.vertexHandler->draw();
             glUseProgram(0);
         }
@@ -126,6 +126,11 @@ void GLApplication::setProcessMouseCallback() {
         app->camera.ProcessMouseScroll(yoffset);
     });
 
+
+}
+
+GLFWwindow *GLApplication::getWindowPtr() {
+    return window;
 }
 
 
