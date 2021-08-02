@@ -7,7 +7,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <ShaderHandler.h>
-#include <VertexHandler.h>
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <RenderableObject.h>
@@ -29,38 +28,58 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-    glm::vec3 lightPos(25.,5.,0.);
+    glm::vec3 lightPos(9.,5.,0.);
+    glm::vec3 lightPos2(-0.,5.,9.);
+    glm::vec3 directional(9.f, -50.0f, -0.f);
+
     Material material2{};
     material2.specular = {0.5f, 0.5f, 0.5f};
     material2.shininess = 64.0f;
+
+
     LightProperties ill{};
-    ill.ambient = {0.2f, 0.2f, 0.2f};
+    ill.ambient = {0.1f, 0.1f, 0.1f};
     ill.diffuse = { 0.5f, 0.5f, 0.5f};
     ill.specular =  {1.0f, 1.0f, 1.0f};
+
+
+    DirectionalLight dirLight{};
+    dirLight.properties = ill;
+    dirLight.direction = directional;
+
+    PointLight pLight{};
+    pLight.properties = ill;
+    pLight.position = lightPos;
+    pLight.constant = 1.f;
+    pLight.linear = 0.09f;
+    pLight.quadratic = 0.032f;
+
+    PointLight pLight2{pLight};
+    pLight2.position = lightPos2;
 
 
     ApplicationParams params{800,600};
     GLApplication app(params);
 
     auto cube2 = glTests::createCubeWithNormal({0.f,4.f,0.f},5.f,{R,R,R,R,R,R,R,R});
-    RenderableObject obj2("shaders/TextureLightingMap.vert.spv","shaders/LightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
+    RenderableObject obj2("shaders/TextureLightingMap.vert.spv","shaders/MultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
     obj2.setTexture("../textures/metal.jpg",false);
     obj2.setTexture("../textures/metal_specular.jpg",false);
     obj2.enableNormalAttribute();
     obj2.setTextureMaterial(material2);
-    obj2.setIllumination(ill);
+    obj2.addPointLight(pLight);
+    obj2.addPointLight(pLight2);
     obj2.objModelFun = [](float time) {
         return glm::rotate(glm::mat4(1.f),time*glm::radians(90.f),glm::vec3(0.,1.,0.));
     };
     obj2.postModelFun = [&](float time,Camera& camera) {
-        obj2.shaderHandler->setVec3Uniform("light.position", lightPos);
-        obj2.shaderHandler->setVec3Uniform("viewPos",camera.Position);
+       obj2.shaderHandler->setVec3Uniform("viewPos",camera.Position);
     };
     app.addRenderableObject(obj2);
 
 
 
-    auto plane = glTests::createPlaneWithNormal({0.f,-.5f,0.f},50.f,{G,G,G,G,G,G,G});
+   /* auto plane = glTests::createPlaneWithNormal({0.f,-.5f,0.f},50.f,{G,G,G,G,G,G,G});
 
     RenderableObject planeObj{"shaders/TextureLightingMap.vert.spv","shaders/LightingMap.frag.spv",std::move(plane.first),std::move(plane.second)};
     planeObj.setTexture("../textures/metal2.jpg",false);
@@ -75,22 +94,36 @@ int main()
     planeObj.postModelFun = [&](float time,Camera& camera) {
         planeObj.shaderHandler->setVec3Uniform("light.position", lightPos);
         planeObj.shaderHandler->setVec3Uniform("viewPos",camera.Position);
-    };
-    app.addRenderableObject(planeObj);
+    };*/
+    //app.addRenderableObject(planeObj);
 
 
 
 
-    auto lightCube = glTests::createCubeWithNormal({lightPos.x,lightPos.y,lightPos.z},2.f, {W,W,W,W,W,W,W,W});
+    auto lightCube = glTests::createCubeWithNormal({lightPos.x,lightPos.y,lightPos.z},1.f, {W,W,W,W,W,W,W,W});
     RenderableObject light("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube.first),std::move(lightCube.second));
     light.objModelFun = [&](float time) {
         return glm::mat4(1.f);
     };
     app.addRenderableObject(light);
 
+    auto lightCube2 = glTests::createCubeWithNormal(lightPos2,1.f, {W,W,W,W,W,W,W,W});
+    RenderableObject light2("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube2.first),std::move(lightCube2.second));
+    light2.objModelFun = [&](float time) {
+        return glm::mat4(1.f);
+    };
+    app.addRenderableObject(light2);
+
+    auto lightCube3 = glTests::createCubeWithNormal(-directional,1.f, {G,G,G,G,G,G,G,G});
+    RenderableObject light3("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube3.first),std::move(lightCube3.second));
+    light3.objModelFun = [&](float time) {
+        return glm::mat4(1.f);
+    };
+    app.addRenderableObject(light3);
 
 
-    glClearColor(122.0f/255, 204.0f/255, 255.0f/255, 1.0f);
+
+    glClearColor(0.,0.,0., 1.0f);
     app.run();
     return 0;
 }

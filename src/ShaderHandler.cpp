@@ -84,6 +84,7 @@ void ShaderHandler::useShader() const {
 
 template<typename UniformType>
 void ShaderHandler::setScalarUniform(const std::string& name, UniformType value) const {
+    //std::cout << "Setting property: " << name << " in location: " << glGetUniformLocation(this->shaderProgramId,name.c_str()) << std::endl;
     if constexpr(std::is_same<UniformType,float>::value)
         glUniform1f(glGetUniformLocation(this->shaderProgramId, name.c_str()), value);
     if constexpr(std::is_same<UniformType,bool>::value || std::is_same<UniformType,int>::value)
@@ -100,6 +101,7 @@ void ShaderHandler::setVec3Uniform(const std::string &name, std::vector<UniformV
 }
 
 void ShaderHandler::setVec3Uniform(const std::string &name, glm::vec3 vec ) const {
+    //std::cout << "Setting property: " << name << " in location: " << glGetUniformLocation(this->shaderProgramId,name.c_str()) << std::endl;
     int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
     glUniform3f(loc, vec.x, vec.y, vec.z);
 }
