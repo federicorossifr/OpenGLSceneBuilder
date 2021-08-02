@@ -28,19 +28,23 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
-    glm::vec3 lightPos(9.,5.,0.);
-    glm::vec3 lightPos2(-0.,5.,9.);
+    glm::vec3 lightPos(9.,1.,0.);
+    glm::vec3 lightPos2(-0.,1.,9.);
     glm::vec3 directional(9.f, -50.0f, -0.f);
 
     Material material2{};
     material2.specular = {0.5f, 0.5f, 0.5f};
-    material2.shininess = 64.0f;
+    material2.shininess = 32.0f;
 
 
     LightProperties ill{};
     ill.ambient = {0.1f, 0.1f, 0.1f};
     ill.diffuse = { 0.5f, 0.5f, 0.5f};
     ill.specular =  {1.0f, 1.0f, 1.0f};
+
+    LightProperties flill{};
+    flill.diffuse = { 0.2f, 0.2f, 0.0f};
+    flill.specular =  {0.4f, 0.4f, 0.0f};
 
 
     DirectionalLight dirLight{};
@@ -58,18 +62,18 @@ int main()
     pLight2.position = lightPos2;
 
     FlashLight flashLight{};
-    flashLight.properties = ill;
-    flashLight.cutOff = glm::cos(glm::radians(12.5f));
-    flashLight.outerCutOff = glm::cos(glm::radians(17.5f));
+    flashLight.properties = flill;
+    flashLight.cutOff = glm::cos(glm::radians(5.f));
+    flashLight.outerCutOff = glm::cos(glm::radians(15.f));
     flashLight.state = 1;
 
     ApplicationParams params{800,600};
     GLApplication app(params);
     app.putContext("flashLight",flashLight);
-    auto cube2 = glTests::createCubeWithNormal({0.f,4.f,0.f},5.f,{R,R,R,R,R,R,R,R});
+    auto cube2 = glTests::createPlaneWithNormal({0.f,0.f,0.f},20.f,{R,R,R,R,R,R,R,R});
     RenderableObject obj2("shaders/TextureLightingMap.vert.spv","shaders/MultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
-    obj2.setTexture("../textures/metal.jpg",false);
-    obj2.setTexture("../textures/metal_specular.jpg",false);
+    obj2.setTexture("../textures/wood.jpg",false);
+    obj2.setTexture("../textures/wood_specular.jpg",false);
     obj2.enableNormalAttribute();
     obj2.setTextureMaterial(material2);
     obj2.addPointLight(pLight);

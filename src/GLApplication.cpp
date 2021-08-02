@@ -7,7 +7,7 @@
 
 
 
-GLApplication::GLApplication(ApplicationParams& params): applicationParams(params), camera((glm::vec3(0.0f, 0.f, 3.0f))) {
+GLApplication::GLApplication(ApplicationParams& params,glm::vec3 startCamera): applicationParams(params), camera(startCamera) {
     status.frameDeltaTime = 0.f;
     status.lastFrameTime = 0.f;
     status.lastMousePosition = glm::vec2(params.screenWidth/2.f,params.screenHeight/2.f);

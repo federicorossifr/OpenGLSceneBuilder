@@ -37,7 +37,7 @@ protected:
 
 
 public:
-    GLApplication(ApplicationParams& params);
+    GLApplication(ApplicationParams& params,glm::vec3 startCamera = glm::vec3(0.,0.,0.));
     void addRenderableObject(RenderableObject obj);
 
 
