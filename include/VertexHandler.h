@@ -13,14 +13,21 @@
 #include <Vertex.h>
 #include <string>
 #include <optional>
+#include <algorithm>
+#include <array>
+#include <ShaderHandler.h>
+
 
 class VertexHandler {
 public:
     unsigned int vertexBufferObject;
     unsigned int vertexAttributeObject;
     unsigned int eBufferObject;
+
+
     const size_t numIndices;
     std::vector<unsigned int> textureIds;
+    unsigned int depthMapTextureId;
 
     VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
@@ -34,6 +41,5 @@ public:
 
 
     void draw() const;
-
 
 };

@@ -3,8 +3,6 @@
 //
 
 #include <VertexHandler.h>
-#include <algorithm>
-#include <array>
 
 VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices):
     numIndices(indices.size()) {
@@ -31,7 +29,7 @@ VertexHandler::VertexHandler(std::vector<Vertex>&& vertices,std::vector<unsigned
 
 }
 
-const std::array<GLuint ,32> glTextureMap
+const std::array<GLuint ,31> glTextureMap
 {
     GL_TEXTURE0,
     GL_TEXTURE1,
@@ -63,9 +61,9 @@ const std::array<GLuint ,32> glTextureMap
     GL_TEXTURE27,
     GL_TEXTURE28,
     GL_TEXTURE29,
-    GL_TEXTURE30,
-    GL_TEXTURE31
+    GL_TEXTURE30
 };
+
 
 void VertexHandler::draw() const {
     std::for_each(textureIds.begin(),textureIds.end(),[idx=0] (auto& textureId) mutable {
@@ -73,7 +71,6 @@ void VertexHandler::draw() const {
         glBindTexture(GL_TEXTURE_2D, textureId);
         idx++;
     });
-
 
     glBindVertexArray(vertexAttributeObject);
     if(numIndices > 0)

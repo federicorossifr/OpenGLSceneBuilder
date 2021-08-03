@@ -17,6 +17,9 @@ GLApplication::GLApplication(ApplicationParams& params,glm::vec3 startCamera): a
     setupWindow(params);
     std::cout << "Setting up GLAD" << std::endl;
     setupGLAD();
+    std::cout << "Setting up additional FBOs" << std::endl;
+    setupFBOs();
+
 }
 
 void GLApplication::setupGLAD() {
@@ -50,9 +53,10 @@ void GLApplication::setupWindow(ApplicationParams& params) {
 }
 
 void GLApplication::renderLoop() {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    auto* shadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
 
         glfwPollEvents();
         float time = glfwGetTime();
@@ -60,16 +64,20 @@ void GLApplication::renderLoop() {
         status.lastFrameTime = time;
         processKeyboardInput();
 
-        auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
-        for(const auto& obj: objects) {
-            obj.shaderHandler->useShader();
-            obj.shaderHandler->applyMat("model",obj.objectModel(time));
-            obj.shaderHandler->applyMat("projection",persp);
-            obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-            if(obj.postModelFun) obj.postModel(time,this);
-            obj.vertexHandler->draw();
-            glUseProgram(0);
-        }
+        shadowShader->useShader();
+        glViewport(0, 0, 2048,2048);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        renderScene(time,shadowShader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        glViewport(0, 0, applicationParams.screenWidth,applicationParams.screenHeight);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE31);
+        glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
+        renderScene(time, nullptr);
+
         glfwSwapBuffers(window);
     }
     glfwTerminate();
@@ -80,7 +88,7 @@ void GLApplication::run() {
 }
 
 void GLApplication::addRenderableObject(RenderableObject obj) {
-    objects.push_back(obj);
+    renderableScene.objects.push_back(obj);
 }
 
 void GLApplication::processKeyboardInput() {
@@ -131,6 +139,47 @@ void GLApplication::setProcessMouseCallback() {
 
 GLFWwindow *GLApplication::getWindowPtr() {
     return window;
+}
+
+void GLApplication::setupFBOs() {
+    glGenFramebuffers(1,&depthMapFrameBuffer);
+    glGenTextures(1,&depthMapTextureId);
+
+    glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,2048,2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTextureId, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GLApplication::renderScene(float time,ShaderHandler* shader) {
+    auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
+    auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    auto lightView = glm::lookAt(-renderableScene.illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    auto lightSpaceMatrix = lightProjection*lightView;
+    for(auto& obj: renderableScene.objects) {
+        if( shader != nullptr) obj.swapShaderHandler(shader);
+
+        obj.shaderHandler->useShader();
+        obj.shaderHandler->applyMat("model",obj.objectModel(time));
+        obj.shaderHandler->applyMat("projection",persp);
+        obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
+        obj.shaderHandler->applyMat("lightSpaceMatrix",lightSpaceMatrix);
+        if(obj.postModelFun) obj.postModel(time,this);
+
+        obj.vertexHandler->draw();
+        if( shader != nullptr) obj.swapShaderHandler();
+        glUseProgram(0);
+    }
 }
 
 

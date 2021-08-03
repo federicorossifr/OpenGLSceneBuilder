@@ -107,6 +107,7 @@ void ShaderHandler::setVec3Uniform(const std::string &name, glm::vec3 vec ) cons
 }
 
 void ShaderHandler::applyMat(const std::string &name, glm::mat4 mat) const {
+    //std::cout << "Setting property: " << name << " in location: " << glGetUniformLocation(this->shaderProgramId,name.c_str()) << std::endl;
     int loc = glGetUniformLocation(this->shaderProgramId, name.c_str());
     glUniformMatrix4fv(loc,1,false,(float*)&mat);
 }

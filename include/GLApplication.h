@@ -16,13 +16,16 @@
 #include <RenderableObject.h>
 #include <functional>
 #include "Camera.h"
+#include "Scene.h"
 #include <any>
 class RenderableObject;
 class GLApplication {
 protected:
     GLFWwindow* window;
-    std::vector<RenderableObject> objects;
     ApplicationParams applicationParams;
+    std::unordered_map<std::string,std::any> context;
+    unsigned int depthMapFrameBuffer, depthMapTextureId;
+
     struct {
         float frameDeltaTime;
         float lastFrameTime;
@@ -31,17 +34,19 @@ protected:
     } status;
     void setupGLAD();
     void setupWindow(ApplicationParams& params);
+    void setupFBOs();
     void renderLoop();
     void processKeyboardInput();
     void setProcessMouseCallback();
-
+    void renderScene(float time,ShaderHandler* shader = nullptr);
 
 public:
+    Scene renderableScene;
+
     GLApplication(ApplicationParams& params,glm::vec3 startCamera = glm::vec3(0.,0.,0.));
     void addRenderableObject(RenderableObject obj);
 
 
-    std::unordered_map<std::string,std::any> context;
 
     void putContext(const std::string& key,std::any value) {
         context[key] = value;
