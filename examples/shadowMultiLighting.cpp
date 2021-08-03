@@ -51,10 +51,10 @@ int main()
     ApplicationParams params{800,600};
     GLApplication app(params);
     app.renderableScene.illumination.directionalLight = dirLight;
-    auto cube2 = glTests::createPlaneWithNormal({0.f,0.f,0.f},10.f,{R,R,R,R,R,R,R,R});
+    auto cube2 = glTests::createPlaneWithNormal({0.f,0.f,0.f},30.f,{W,W,W,W,W,W,W,W});
     RenderableObject obj2("shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
-    obj2.setTexture("../textures/metal.jpg",false);
-    obj2.setTexture("../textures/metal_specular.jpg",false);
+   // obj2.setTexture("../textures/metal.jpg",false);
+  //  obj2.setTexture("../textures/metal_specular.jpg",false);
     obj2.enableNormalAttribute();
     obj2.setTextureMaterial(material2);
     obj2.setDirectionalLight(dirLight);
@@ -67,7 +67,9 @@ int main()
     };
     app.addRenderableObject(obj2);
 
-    auto cube = glTests::createCubeWithNormal({-2.5f,4.f,-2.5f},2.f,{R,R,R,R,R,R,R,R});
+    glm::vec3 cubePos{-2.5f,4.f,-2.5f};
+    float side = 2.f;
+    auto cube = glTests::createCubeWithNormal(cubePos,side,{R,R,R,R,R,R,R,R});
     RenderableObject cubeObj("shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv",std::move(cube.first),std::move(cube.second));
     cubeObj.setTexture("../textures/container2.png",true);
     cubeObj.setTexture("../textures/container2_specular.png",true);
@@ -76,8 +78,20 @@ int main()
     cubeObj.setDirectionalLight(dirLight);
     cubeObj.shaderHandler->setScalarUniform("shadowMap",31);
 
-    cubeObj.objModelFun = [](float time) {
-        return glm::rotate(glm::mat4(1.f),time*glm::radians(0.f),glm::vec3(0.,1.,0.));
+    cubeObj.objModelFun = [&](float time) {
+        glm::vec3 newH(0.,0.5*side/glm::cos(glm::radians(45.f))-0.5*side*glm::cos(glm::radians(45.f)),0.) ;
+        auto mod = glm::translate(glm::mat4(1.f),cubePos+newH);
+        mod = glm::rotate(mod,time*glm::radians(45.f),glm::vec3(0.,1.,0.));
+
+        mod = glm::rotate(mod,glm::radians(45.f),glm::vec3(1.,0.,0.));
+        mod = glm::rotate(mod,glm::radians(45.f),glm::vec3(0.,0.,1.));
+
+        mod = glm::translate(mod,-cubePos);
+
+        //mod = glm::translate(mod,-glm::vec3(0,7.f,-2.5f));
+
+        return mod;
+
     };
     cubeObj.postModelFun = [&](float time,GLApplication* app) {
         cubeObj.shaderHandler->setVec3Uniform("viewPos",app->camera.Position);
