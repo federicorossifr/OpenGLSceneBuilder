@@ -24,7 +24,12 @@ protected:
     GLFWwindow* window;
     ApplicationParams applicationParams;
     std::unordered_map<std::string,std::any> context;
+    std::vector<std::function<void(void)>> renderPasses;
     unsigned int depthMapFrameBuffer, depthMapTextureId;
+
+    enum RenderPass {
+        SHADOW,FINAL
+    };
 
     struct {
         float frameDeltaTime;
@@ -38,12 +43,12 @@ protected:
     void renderLoop();
     void processKeyboardInput();
     void setProcessMouseCallback();
-    void renderScene(float time,ShaderHandler* shader = nullptr);
+    void renderScene(float time,ShaderHandler* shader,RenderPass state);
 
 public:
     Scene renderableScene;
 
-    GLApplication(ApplicationParams& params,glm::vec3 startCamera = glm::vec3(0.,0.,0.));
+    explicit GLApplication(ApplicationParams& params,glm::vec3 startCamera = glm::vec3(0.,0.,0.));
     void addRenderableObject(RenderableObject obj);
 
 
@@ -61,6 +66,8 @@ public:
     void run();
 
     Camera camera;
+
+    void setupRenderPasses();
 };
 
 

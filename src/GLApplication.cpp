@@ -52,10 +52,35 @@ void GLApplication::setupWindow(ApplicationParams& params) {
     setProcessMouseCallback();
 }
 
+void GLApplication::setupRenderPasses() {
+    auto* shadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
+    putContext("shadowShader",shadowShader);
+    renderPasses = {
+            [&]() {
+                ShaderHandler* ss;
+                getContext("shadowShader",ss);
+                ss->useShader();
+                glViewport(0, 0, 2048,2048);
+                glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                renderScene(status.lastFrameTime,ss,RenderPass::SHADOW);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                },
+                [&]() {
+                glViewport(0, 0, applicationParams.screenWidth,applicationParams.screenHeight);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glActiveTexture(GL_TEXTURE31);
+                glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
+                renderScene(status.lastFrameTime, nullptr,RenderPass::FINAL);
+            }
+    };
+}
+
 void GLApplication::renderLoop() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    auto* shadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
+    setupRenderPasses();
+
     while (!glfwWindowShouldClose(window)) {
 
         glfwPollEvents();
@@ -64,19 +89,10 @@ void GLApplication::renderLoop() {
         status.lastFrameTime = time;
         processKeyboardInput();
 
-        shadowShader->useShader();
-        glViewport(0, 0, 2048,2048);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        renderScene(time,shadowShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-        glViewport(0, 0, applicationParams.screenWidth,applicationParams.screenHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glActiveTexture(GL_TEXTURE31);
-        glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
-        renderScene(time, nullptr);
+        for(const auto& renderPass: renderPasses) renderPass();
+
 
         glfwSwapBuffers(window);
     }
@@ -161,19 +177,23 @@ void GLApplication::setupFBOs() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLApplication::renderScene(float time,ShaderHandler* shader) {
+void GLApplication::renderScene(float time,ShaderHandler* shader,RenderPass state) {
     auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
     auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
     auto lightView = glm::lookAt(-renderableScene.illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     auto lightSpaceMatrix = lightProjection*lightView;
     for(auto& obj: renderableScene.objects) {
         if( shader != nullptr) obj.swapShaderHandler(shader);
-
         obj.shaderHandler->useShader();
         obj.shaderHandler->applyMat("model",obj.objectModel(time));
         obj.shaderHandler->applyMat("projection",persp);
         obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-        obj.shaderHandler->applyMat("lightSpaceMatrix",lightSpaceMatrix);
+        if (state == RenderPass::SHADOW && !obj.canCastShadow) {
+            obj.shaderHandler->applyMat("lightSpaceMatrix",glm::mat4(0.f));
+        } else {
+            obj.shaderHandler->applyMat("lightSpaceMatrix",lightSpaceMatrix);
+        }
+
         if(obj.postModelFun) obj.postModel(time,this);
 
         obj.vertexHandler->draw();
@@ -181,6 +201,8 @@ void GLApplication::renderScene(float time,ShaderHandler* shader) {
         glUseProgram(0);
     }
 }
+
+
 
 
 

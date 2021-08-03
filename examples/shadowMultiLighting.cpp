@@ -106,6 +106,7 @@ int main()
     light2.objModelFun = [&](float time) {
         return glm::mat4(1.f);
     };
+    light2.canCastShadow = false;
     app.addRenderableObject(light2);
 
     app.run();

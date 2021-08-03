@@ -21,6 +21,7 @@ public:
     ShaderHandler* shaderHandler;
     std::function<glm::mat4(float)> objModelFun;
     std::function<void(float,GLApplication* app)> postModelFun;
+    bool canCastShadow{true};
 
     RenderableObject(std::string&& vertexFile, std::string&& fragmentFile, std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
