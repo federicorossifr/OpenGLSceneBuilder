@@ -42,7 +42,17 @@ int main()
     ill.diffuse = { 0.4f, 0.4f, 0.4f};
     ill.specular =  {0.2f, 0.2f, 0.2f};
 
+    LightProperties ill2{};
+    ill2.ambient = {0.8f, 0.8f, 0.8f};
+    ill2.diffuse = { 0.8f, 0.8f, 0.8f};
+    ill2.specular =  {0.2f, 0.2f, 0.2f};
 
+    PointLight pLight{};
+    pLight.properties = ill2;
+    pLight.position = lightPos;
+    pLight.constant = 1.f;
+    pLight.linear = 0.09f;
+    pLight.quadratic = 0.032f;
 
 
 
@@ -59,7 +69,7 @@ int main()
     obj2.enableNormalAttribute();
     obj2.setTextureMaterial(material2);
     obj2.setDirectionalLight(dirLight);
-
+    obj2.addPointLight(pLight);
     obj2.shaderHandler->setScalarUniform("shadowMap",31);
     obj2.objModelFun = [](float time) {
         return glm::rotate(glm::mat4(1.f),time*glm::radians(0.f),glm::vec3(0.,1.,0.));
@@ -78,6 +88,7 @@ int main()
     cubeObj.enableNormalAttribute();
     cubeObj.setTextureMaterial(material2);
     cubeObj.setDirectionalLight(dirLight);
+    cubeObj.addPointLight(pLight);
     cubeObj.shaderHandler->setScalarUniform("shadowMap",31);
 
     cubeObj.objModelFun = [&](float time) {
@@ -101,6 +112,7 @@ int main()
     cube3Obj.enableNormalAttribute();
     cube3Obj.setTextureMaterial(material2);
     cube3Obj.setDirectionalLight(dirLight);
+    cube3Obj.addPointLight(pLight);
     cube3Obj.shaderHandler->setScalarUniform("shadowMap",31);
 
     cube3Obj.objModelFun = [](float time) {
@@ -111,6 +123,9 @@ int main()
     };
     app.addRenderableObject(cube3Obj);
 
+
+
+
     auto lightCube2 = glTests::createCubeWithNormal(-directional,1.f, {W,W,W,W,W,W,W,W});
     RenderableObject light2("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube2.first),std::move(lightCube2.second));
     light2.objModelFun = [&](float time) {
@@ -118,6 +133,16 @@ int main()
     };
     light2.canCastShadow = false;
     app.addRenderableObject(light2);
+
+
+    auto lightCube3 = glTests::createCubeWithNormal(lightPos,1.f, {W,W,W,W,W,W,W,W});
+    RenderableObject light3("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube3.first),std::move(lightCube3.second));
+    light3.objModelFun = [&](float time) {
+        return glm::mat4(1.f);
+    };
+    light3.canCastShadow = false;
+    app.addRenderableObject(light3);
+
 
     app.run();
     return 0;
