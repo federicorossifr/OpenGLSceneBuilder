@@ -54,7 +54,10 @@ void GLApplication::setupWindow(ApplicationParams& params) {
 
 void GLApplication::setupRenderPasses() {
     auto* shadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
+    auto* pointShadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
+
     putContext("shadowShader",shadowShader);
+    putContext("pointShadowShader",pointShadowShader);
     renderPasses = {
             [&]() {
                 ShaderHandler* ss;
@@ -63,15 +66,26 @@ void GLApplication::setupRenderPasses() {
                 glViewport(0, 0, 2048,2048);
                 glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
                 glClear(GL_DEPTH_BUFFER_BIT);
-                renderScene(status.lastFrameTime,ss,RenderPass::SHADOW);
+                renderScene(status.lastFrameTime,ss,RenderPass::Shadow);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                },
-                [&]() {
+            },
+            [&]() {
+                ShaderHandler* ss;
+                getContext("pointShadowShader",ss);
+                ss->useShader();
+                glViewport(0, 0, 2048,2048);
+                glBindFramebuffer(GL_FRAMEBUFFER, depthCubemapFrameBuffer);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                renderScene(status.lastFrameTime,ss,RenderPass::PointShadow);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            },
+            [&]() {
                 glViewport(0, 0, applicationParams.screenWidth,applicationParams.screenHeight);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glActiveTexture(GL_TEXTURE31);
                 glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
-                renderScene(status.lastFrameTime, nullptr,RenderPass::FINAL);
+                renderScene(status.lastFrameTime, nullptr,RenderPass::Final);
             }
     };
 }
@@ -158,9 +172,13 @@ GLFWwindow *GLApplication::getWindowPtr() {
 }
 
 void GLApplication::setupFBOs() {
-    glGenFramebuffers(1,&depthMapFrameBuffer);
-    glGenTextures(1,&depthMapTextureId);
 
+    // Create Framebuffer for depth maps
+
+    glGenFramebuffers(1,&depthMapFrameBuffer);
+    glGenFramebuffers(1,&depthCubemapFrameBuffer);
+    // Attach depth map texture for directional shadows
+    glGenTextures(1,&depthMapTextureId);
     glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,2048,2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -170,28 +188,77 @@ void GLApplication::setupFBOs() {
     float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
+
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTextureId, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+    // Create cubemap for the point shadows
+
+    glGenTextures(1, &depthCubeMapTextureId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMapTextureId);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+                     2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthCubemapFrameBuffer);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMapTextureId, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLApplication::renderScene(float time,ShaderHandler* shader,RenderPass state) {
+void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPass state) {
     auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
     auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
     auto lightView = glm::lookAt(-renderableScene.illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     auto lightSpaceMatrix = lightProjection*lightView;
+
+    auto shadowProjection = glm::perspective(glm::radians(90.0f), 1.f, 0.1f, 100.0f);
+
     for(auto& obj: renderableScene.objects) {
         if( shader != nullptr) obj.swapShaderHandler(shader);
         obj.shaderHandler->useShader();
         obj.shaderHandler->applyMat("model",obj.objectModel(time));
         obj.shaderHandler->applyMat("projection",persp);
         obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
-        if (state == RenderPass::SHADOW && !obj.canCastShadow) {
+        if (state == RenderPass::Shadow && !obj.canCastShadow) {
             obj.shaderHandler->applyMat("lightSpaceMatrix",glm::mat4(0.f));
         } else {
             obj.shaderHandler->applyMat("lightSpaceMatrix",lightSpaceMatrix);
+        }
+
+        if (state == RenderPass::PointShadow && !renderableScene.illumination.pointLights.empty()) {
+            // Set matrices for pointshadow shader
+            auto lightPos = renderableScene.illumination.pointLights[0].position;
+            std::vector<glm::mat4> shadowTransforms;
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3( 0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
+            shadowTransforms.push_back(shadowProjection *
+            glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0,0.0)));
+
+            std::for_each(shadowTransforms.begin(),shadowTransforms.end(),[&,n=0](auto& mat) mutable {
+                obj.shaderHandler->applyMat("shadowMatrices[" + std::to_string(n) + "]", mat);
+            });
+            obj.shaderHandler->setScalarUniform("far_plane",100.f);
+            obj.shaderHandler->setVec3Uniform("lightPos",lightPos);
         }
 
         if(obj.postModelFun) obj.postModel(time,this);

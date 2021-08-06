@@ -47,10 +47,15 @@ int main()
     dirLight.properties = ill;
     dirLight.direction = directional;
 
+    PointLight pointLight{};
+    pointLight.position = lightPos;
+    pointLight.properties = ill;
+
 
     ApplicationParams params{800,600};
     GLApplication app(params);
     app.renderableScene.illumination.directionalLight = dirLight;
+    app.renderableScene.illumination.pointLights.push_back(pointLight);
     auto cube2 = glTests::createPlaneWithNormal({0.f,0.f,0.f},30.f,{W,W,W,W,W,W,W,W});
     RenderableObject obj2("shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
    // obj2.setTexture("../textures/metal.jpg",false);

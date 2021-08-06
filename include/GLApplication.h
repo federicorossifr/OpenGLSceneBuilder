@@ -26,9 +26,10 @@ protected:
     std::unordered_map<std::string,std::any> context;
     std::vector<std::function<void(void)>> renderPasses;
     unsigned int depthMapFrameBuffer, depthMapTextureId;
+    unsigned int depthCubemapFrameBuffer,depthCubeMapTextureId;
 
     enum RenderPass {
-        SHADOW,FINAL
+        PointShadow,Shadow,Final
     };
 
     struct {
@@ -43,7 +44,7 @@ protected:
     void renderLoop();
     void processKeyboardInput();
     void setProcessMouseCallback();
-    void renderScene(float time,ShaderHandler* shader,RenderPass state);
+    void renderScene(float time,ShaderHandler* shader,const RenderPass state);
 
 public:
     Scene renderableScene;
