@@ -19,6 +19,7 @@
 #include "Scene.h"
 #include <any>
 class RenderableObject;
+class Scene;
 class GLApplication {
 protected:
     GLFWwindow* window;
@@ -47,7 +48,7 @@ protected:
     void renderScene(float time,ShaderHandler* shader,const RenderPass state);
 
 public:
-    Scene renderableScene;
+    Scene* renderableScene;
 
     explicit GLApplication(ApplicationParams& params,glm::vec3 startCamera = glm::vec3(0.,0.,0.));
     void addRenderableObject(RenderableObject obj);

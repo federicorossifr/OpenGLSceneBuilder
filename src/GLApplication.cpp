@@ -120,7 +120,7 @@ void GLApplication::run() {
 }
 
 void GLApplication::addRenderableObject(RenderableObject obj) {
-    renderableScene.objects.push_back(obj);
+    renderableScene->objects.push_back(obj);
 }
 
 void GLApplication::processKeyboardInput() {
@@ -223,12 +223,12 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
     float far_plane = 100.f;
     auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, far_plane);
     auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    auto lightView = glm::lookAt(-renderableScene.illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    auto lightView = glm::lookAt(-renderableScene->illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     auto lightSpaceMatrix = lightProjection*lightView;
 
     auto shadowProjection = glm::perspective(glm::radians(90.0f), 1.f, 0.1f, 100.0f);
 
-    for(auto& obj: renderableScene.objects) {
+    for(auto& obj: renderableScene->objects) {
         if( shader != nullptr) obj.swapShaderHandler(shader);
         obj.shaderHandler->useShader();
         obj.shaderHandler->applyMat("model",obj.objectModel(time));
@@ -241,9 +241,9 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
             obj.shaderHandler->applyMat("lightSpaceMatrix",lightSpaceMatrix);
         }
 
-        if (state == RenderPass::PointShadow && !renderableScene.illumination.pointLights.empty()) {
+        if (state == RenderPass::PointShadow && !renderableScene->illumination.pointLights.empty()) {
             // Set matrices for pointshadow shader
-            auto lightPos = renderableScene.illumination.pointLights[0].position;
+            auto lightPos = renderableScene->illumination.pointLights[0].position;
             std::vector<glm::mat4> shadowTransforms;
             shadowTransforms.push_back(shadowProjection *
             glm::lookAt(lightPos, lightPos + glm::vec3( 1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));

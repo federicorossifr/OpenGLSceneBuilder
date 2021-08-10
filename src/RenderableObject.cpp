@@ -20,7 +20,7 @@ void RenderableObject::setMaterial(Material &mat) {
     shaderHandler->setScalarUniform("material.shininess", mat.shininess);
 }
 
-void RenderableObject::setIllumination(LightProperties &light, const std::string &lightPropertyName) {
+void RenderableObject::setIllumination(const LightProperties &light, const std::string &lightPropertyName) {
     if(shaderHandler == nullptr) return;
     shaderHandler->useShader();
     shaderHandler->setVec3Uniform(lightPropertyName+".ambient", light.ambient);
@@ -45,7 +45,7 @@ void RenderableObject::setFlashLight(FlashLight &fl){
     shaderHandler->setScalarUniform("flashLight.outerCutOff",fl.outerCutOff);
 }
 
-void RenderableObject::addPointLight(PointLight &pl) {
+void RenderableObject::addPointLight(const PointLight &pl) {
     if(spotLightIdx == maxSpotLights-1) return;
     if(shaderHandler == nullptr) return;
     shaderHandler->useShader();
@@ -81,4 +81,11 @@ void RenderableObject::enableEmissionMap(){
 
 void RenderableObject::setTexture(std::string &&filename, bool hasAlpha) {
     vertexHandler->bindTexture(std::move(filename),hasAlpha);
+}
+
+void RenderableObject::setPointLights(std::vector<PointLight> &pls) {
+    spotLightIdx = 0;
+    for(const auto& pl:pls) {
+        addPointLight(pl);
+    }
 }

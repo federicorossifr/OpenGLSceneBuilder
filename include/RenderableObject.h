@@ -31,13 +31,15 @@ public:
 
     void setMaterial(Material& mat);
 
-    void setIllumination(LightProperties& light,const std::string& lightPropertyName = "light");
+    void setIllumination(const LightProperties& light,const std::string& lightPropertyName = "light");
 
     void setDirectionalLight(DirectionalLight& dir);
 
     void setFlashLight(FlashLight& fl);
 
-    void addPointLight(PointLight& pl);
+    void addPointLight(const PointLight& pl);
+
+    void setPointLights(std::vector<PointLight>& pls);
 
     void setTextureMaterial(Material& mat);
 

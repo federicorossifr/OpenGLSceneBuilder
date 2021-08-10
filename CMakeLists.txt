@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 project(opengl_test)
 
 set(CMAKE_CXX_STANDARD 17)
-
+add_compile_options(-Ofast -march=native)
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 file(GLOB_RECURSE proj_srcs "src/*.cpp" "src/*.cc")
 message(STATUS ${proj_srcs})
 add_library(gl_proj SHARED ${proj_srcs})
-
 if(WIN32)
 	target_link_libraries(gl_proj PUBLIC glu32 glfw3)
 else()
