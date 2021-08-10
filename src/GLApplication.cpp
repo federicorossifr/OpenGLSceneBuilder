@@ -54,7 +54,7 @@ void GLApplication::setupWindow(ApplicationParams& params) {
 
 void GLApplication::setupRenderPasses() {
     auto* shadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
-    auto* pointShadowShader = new ShaderHandler("shaders/ShadowMapping.vert.spv","shaders/ShadowMapping.frag.spv");
+    auto* pointShadowShader = new ShaderHandler("shaders/PointShadowMapping.vert.spv","shaders/PointShadowMapping.frag.spv","shaders/PointShadowMapping.geom.spv");
 
     putContext("shadowShader",shadowShader);
     putContext("pointShadowShader",pointShadowShader);
@@ -85,6 +85,8 @@ void GLApplication::setupRenderPasses() {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glActiveTexture(GL_TEXTURE31);
                 glBindTexture(GL_TEXTURE_2D, depthMapTextureId);
+                glActiveTexture(GL_TEXTURE30);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMapTextureId);
                 renderScene(status.lastFrameTime, nullptr,RenderPass::Final);
             }
     };
@@ -202,7 +204,7 @@ void GLApplication::setupFBOs() {
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMapTextureId);
     for (unsigned int i = 0; i < 6; ++i)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
-                     2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+                     2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -218,7 +220,8 @@ void GLApplication::setupFBOs() {
 }
 
 void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPass state) {
-    auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, 100.0f);
+    float far_plane = 100.f;
+    auto persp = glm::perspective(glm::radians(camera.Zoom), (float)applicationParams.screenWidth / (float)applicationParams.screenHeight, 0.1f, far_plane);
     auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
     auto lightView = glm::lookAt(-renderableScene.illumination.directionalLight.direction, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     auto lightSpaceMatrix = lightProjection*lightView;
@@ -231,6 +234,7 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
         obj.shaderHandler->applyMat("model",obj.objectModel(time));
         obj.shaderHandler->applyMat("projection",persp);
         obj.shaderHandler->applyMat("view",camera.GetViewMatrix());
+        obj.shaderHandler->setScalarUniform("farPlane",far_plane);
         if (state == RenderPass::Shadow && !obj.canCastShadow) {
             obj.shaderHandler->applyMat("lightSpaceMatrix",glm::mat4(0.f));
         } else {
@@ -255,9 +259,9 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
             glm::lookAt(lightPos, lightPos + glm::vec3( 0.0, 0.0,-1.0), glm::vec3(0.0,-1.0,0.0)));
 
             std::for_each(shadowTransforms.begin(),shadowTransforms.end(),[&,n=0](auto& mat) mutable {
-                obj.shaderHandler->applyMat("shadowMatrices[" + std::to_string(n) + "]", mat);
+                obj.shaderHandler->applyMat("shadowMatrices[" + std::to_string(n++) + "]", mat);
             });
-            obj.shaderHandler->setScalarUniform("far_plane",100.f);
+            obj.shaderHandler->setScalarUniform("far_plane",far_plane);
             obj.shaderHandler->setVec3Uniform("lightPos",lightPos);
         }
 

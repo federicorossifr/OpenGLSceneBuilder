@@ -48,6 +48,9 @@ uniform Material material;
 uniform int numPointLights;
 uniform vec3 viewPos;
 uniform sampler2D shadowMap;
+uniform samplerCube depthMap;
+
+uniform float farPlane;
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -81,6 +84,24 @@ float computeShadow(vec4 fragPosLightSpace,float bias)
     // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
     if(projCoords.z > 1.0)
         shadow = 0.0;
+    return shadow;
+}
+
+float computePointShadow(vec3 fragPos,PointLight light)
+{
+    // get vector between fragment position and light position
+    vec3 lightPos = light.position;
+    vec3 fragToLight = fragPos - lightPos;
+    // use the light to fragment vector to sample from the depth map
+    float closestDepth = texture(depthMap, fragToLight).r;
+    // it is currently in linear range between [0,1]. Re-transform back to original value
+    closestDepth *= farPlane;
+    // now get current linear depth as the length between the fragment and light position
+    float currentDepth = length(fragToLight);
+    // now test for shadows
+    float bias = 0.01;
+    float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+
     return shadow;
 }
 
@@ -138,7 +159,10 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+
+    float shadow = computePointShadow(FragPos,light);
+
+    return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
 
 vec3 CalcFlashLight(FlashLight light, vec3 normal, vec3 fragPos, vec3 viewDir)

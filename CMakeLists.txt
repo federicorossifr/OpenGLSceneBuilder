@@ -50,7 +50,7 @@ target_link_libraries(debug_static PUBLIC glu32 glfw3 -static)
 target_compile_options(debug_static PUBLIC -static-libgcc -static-libstdc++ )
 target_link_libraries(debug_static PUBLIC  -static-libgcc -static-libstdc++ -static)
 
-file(GLOB_RECURSE shaders "shaders/*.vert" "shaders/*.frag" )
+file(GLOB_RECURSE shaders "shaders/*.vert" "shaders/*.frag" "shaders/*.geom")
 foreach(GLSL  ${shaders})
     get_filename_component(FILE_NAME ${GLSL} NAME)
     set(SPIRV "${PROJECT_BINARY_DIR}/shaders/${FILE_NAME}.spv")

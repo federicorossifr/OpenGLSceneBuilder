@@ -56,6 +56,48 @@ unsigned int compileShaderFromSource(const char *vertexShaderSource,const char *
     return shaderProgram;
 }
 
+unsigned int compileShaderFromSource(const char *vertexShaderSource,const char *fragmentShaderSource,const char *geomShaderSource) {
+
+    // vertex shader
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    // check for shader compile errors
+    checkShaderCompilationErrors(vertexShader);
+
+    // fragment shader
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // check for shader compile errors
+    checkShaderCompilationErrors(fragmentShader);
+
+    // geometry shader
+    unsigned int geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(geometryShader, 1, &geomShaderSource, NULL);
+    glCompileShader(geometryShader);
+
+    // check for shader compile errors
+    checkShaderCompilationErrors(geometryShader);
+
+    // link shaders
+    unsigned int shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glAttachShader(shaderProgram,geometryShader);
+    glLinkProgram(shaderProgram);
+
+    // check for linking errors
+    checkShaderLinkingError(shaderProgram);
+
+    // Cleanup
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(geometryShader);
+    return shaderProgram;
+}
+
 ShaderHandler::ShaderHandler(std::string&& vertexFile, std::string&& fragmentFile) {
     std::string vertexCode,fragmentCode;
     std::ifstream vShaderFile,fShaderFile;
@@ -76,6 +118,33 @@ ShaderHandler::ShaderHandler(std::string&& vertexFile, std::string&& fragmentFil
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
     this->shaderProgramId = compileShaderFromSource(vertexCode.c_str(),fragmentCode.c_str());
+}
+
+ShaderHandler::ShaderHandler(std::string&& vertexFile, std::string&& fragmentFile,std::string&& geomFile) {
+    std::string vertexCode,fragmentCode,geomCode;
+    std::ifstream vShaderFile,fShaderFile,gShaderFile;
+    vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+
+    try {
+        vShaderFile.open(vertexFile);
+        fShaderFile.open(fragmentFile);
+        gShaderFile.open(geomFile);
+        std::stringstream vShaderStream, fShaderStream, gShaderStream;
+        vShaderStream << vShaderFile.rdbuf();
+        fShaderStream << fShaderFile.rdbuf();
+        gShaderStream << gShaderFile.rdbuf();
+        vShaderFile.close();
+        fShaderFile.close();
+        gShaderFile.close();
+        vertexCode   = vShaderStream.str();
+        fragmentCode = fShaderStream.str();
+        geomCode     = gShaderStream.str();
+    } catch(std::ifstream::failure e) {
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+    }
+    this->shaderProgramId = compileShaderFromSource(vertexCode.c_str(),fragmentCode.c_str(),geomCode.c_str());
 }
 
 void ShaderHandler::useShader() const {

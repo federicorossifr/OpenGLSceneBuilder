@@ -14,7 +14,9 @@
 
 class ShaderHandler {
 public:
-    // the program ID
+    ShaderHandler(std::string &&vertexFile, std::string &&fragmentFile, std::string &&geomFile);
+
+// the program ID
     unsigned int shaderProgramId;
 
     ShaderHandler(std::string &&vertexFile, std::string &&fragmentFile);
