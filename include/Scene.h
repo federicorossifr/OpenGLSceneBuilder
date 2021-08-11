@@ -11,6 +11,7 @@ class RenderableObject;
 class Scene {
 public:
     std::vector<RenderableObject> objects;
+    std::unordered_map<std::string,RenderableObject*> objectDOM;
     struct {
         DirectionalLight directionalLight;
         std::vector<PointLight> pointLights;

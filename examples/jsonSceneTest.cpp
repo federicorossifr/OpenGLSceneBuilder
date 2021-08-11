@@ -11,7 +11,12 @@ int main() {
 
     Scene scene{};
     app.renderableScene = &scene;
-    Scene::loadSceneFromJSONFile("../scenes/testScene.json",scene);
+    Scene::loadSceneFromJSONFile("../scenes/testScene.json",*app.renderableScene);
     app.renderableScene->syncIllumination();
+    app.renderableScene->objectDOM["central_cube"]->objModelFun = [](float time) {
+        return glm::rotate(glm::mat4(1.f),time*glm::radians(90.f),glm::vec3(0.,1.,0.));
+    };
+    app.renderableScene->objectDOM["light_cube"]->canCastShadow = false;
+    std::cout << "Running application..." << std::endl;
     app.run();
 }

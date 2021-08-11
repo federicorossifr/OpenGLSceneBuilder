@@ -1,15 +1,49 @@
 {
   "Objects": [
     {
+      "Key": "central_cube",
       "Shape": "Cube",
-      "Position": [0,0,0],
-      "Side": 3,
-      "Colour": [1,0,0,1],
-      "Textures": {
-        "Base": "../textures/",
-        "Specular": "../textures/"
+      "Position": [0,2.5,0],
+      "Side": 5,
+      "Colour": [1,1,1,1],
+      "Textures": [
+        "../textures/container2.png",
+        "../textures/container2_specular.png"
+      ],
+      "Material": {
+        "Specular": [0.7, 0.7, 0.7],
+        "Shininess": 128
       },
-      "Material": {},
+      "Shaders": [
+        "shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv"
+      ]
+    },
+    {
+      "Key": "light_cube",
+      "Shape": "Cube",
+      "Position": [-10,10,-10],
+      "Side": 2,
+      "Colour": [1,1,1,1],
+      "Textures": [],
+      "Material": {
+        "Specular": [0.7, 0.7, 0.7],
+        "Shininess": 128
+      },
+      "Shaders": [
+        "shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv"
+      ]
+    },
+    {
+      "Shape": "Plane",
+      "Position": [0,0,0],
+      "Side": 30,
+      "Colour": [1,1,0,1],
+      "Textures": [
+      ],
+      "Material": {
+        "Specular": [0.7, 0.7, 0.7],
+        "Shininess": 128
+      },
       "Shaders": [
         "shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv"
       ]
@@ -17,11 +51,11 @@
   ],
   "Illumination" : {
     "DirectionalLight": {
-      "Position": [20,-20,20],
+      "Position": [10,-10,10],
       "Properties": {
         "Ambient":[0.5, 0.5, 0.5],
-        "Diffuse":[ 0.7, 0.7, 0.7],
-        "Specular":  [1, 1, 1]
+        "Diffuse":[ 0.4, 0.4, 0.4],
+        "Specular":  [0.5, 0.5, 0.5]
       }
     },
     "PointLights": [
