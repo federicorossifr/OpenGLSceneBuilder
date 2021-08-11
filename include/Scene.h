@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include "Illumination.h"
 #include <RenderableObject.h>
-
+#include <simdjson.h>
 class RenderableObject;
 
 class Scene {
@@ -18,4 +18,9 @@ public:
     } illumination;
 
     void syncIllumination();
+    static void loadSceneFromJSONFile(std::string jsonPath,Scene& scene);
+
 };
+
+
+

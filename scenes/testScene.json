@@ -1,0 +1,46 @@
+{
+  "Objects": [
+    {
+      "Shape": "Cube",
+      "Position": [0,0,0],
+      "Side": 3,
+      "Colour": [1,0,0,1],
+      "Textures": {
+        "Base": "../textures/",
+        "Specular": "../textures/"
+      },
+      "Material": {},
+      "Shaders": [
+        "shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv"
+      ]
+    }
+  ],
+  "Illumination" : {
+    "DirectionalLight": {
+      "Position": [20,-20,20],
+      "Properties": {
+        "Ambient":[0.5, 0.5, 0.5],
+        "Diffuse":[ 0.7, 0.7, 0.7],
+        "Specular":  [1, 1, 1]
+      }
+    },
+    "PointLights": [
+      {
+        "Position": [1,1,0],
+        "Properties": {
+          "Ambient":[0.5, 0.5, 0.5],
+          "Diffuse":[ 0.7, 0.7, 0.7],
+          "Specular":  [1, 1, 1]
+        }
+      }
+    ],
+    "FlashLight": {
+      "Position": [1,1,0],
+      "Properties": {
+        "Ambient":[0.5, 0.5, 0.5],
+        "Diffuse":[ 0.7, 0.7, 0.7],
+        "Specular":  [1, 1, 1]
+      }
+    }
+  }
+}

@@ -62,9 +62,8 @@ int main()
 
     Scene scene{};
     app.renderableScene = &scene;
-    app.renderableScene->illumination.pointLights.push_back(pointLight);
-
-
+    //app.renderableScene->illumination.pointLights.push_back(pointLight);
+    app.renderableScene->illumination.directionalLight = dirLight;
     auto cube2 = glTests::createPlaneWithNormal({0.f,0.f,0.f},30.f,{W,W,W,W,W,W,W,W});
     RenderableObject obj2("shaders/ShadowTextureLightingMap.vert.spv","shaders/ShadowMultiLightingMap.frag.spv",std::move(cube2.first),std::move(cube2.second));
     obj2.setTexture("../textures/wood.jpg",false);
@@ -153,7 +152,7 @@ int main()
     RenderableObject light33("shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv",std::move(lightCube3.first),std::move(lightCube3.second));
     light33.objModelFun = [&](float time) {
         auto lpos = lightTransform(time)*lightPos;
-        app.renderableScene->illumination.pointLights[0].position = lpos;
+        //app.renderableScene->illumination.pointLights[0].position = lpos;
         app.renderableScene->syncIllumination();
         return lightTransform(time);
     };

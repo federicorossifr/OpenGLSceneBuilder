@@ -23,9 +23,11 @@ public:
     std::function<void(float,GLApplication* app)> postModelFun;
     bool canCastShadow{true};
 
+    RenderableObject() = default;
+
     RenderableObject(std::string&& vertexFile, std::string&& fragmentFile, std::vector<Vertex>&& vertices,std::vector<unsigned int>&& indices);
 
-    glm::mat4 objectModel(float t) const {return objModelFun(t);};
+    [[nodiscard]] glm::mat4 objectModel(float t) const {return objModelFun(t);};
 
     void postModel(float t,GLApplication* app) const {postModelFun(t,app);};
 
