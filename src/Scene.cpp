@@ -36,34 +36,57 @@ void parseIlluminationProperties(simdjson::simdjson_result<T>& jprop,LightProper
     parseVec3(specular,lp.specular);
 }
 
+void parsePointLight(simdjson::simdjson_result<simdjson::ondemand::object>& jpl,PointLight& pointLight) {
+    LightProperties lp{};
+
+    auto jpl_pos = jpl["Position"].get_array();
+    parseVec3(jpl_pos,pointLight.position);
+
+    auto properties = jpl["Properties"].get_object();
+    parseIlluminationProperties(properties,pointLight.properties);
+
+    auto constant = jpl["Constant"].get_double().value();
+    auto linear = jpl["Linear"].get_double().value();
+    auto quadratic = jpl["Quadratic"].get_double().value();
+
+    pointLight.constant = constant;
+    pointLight.quadratic = quadratic;
+    pointLight.linear = linear;
+}
+
+void parseDirectionalLight(simdjson::simdjson_result<simdjson::ondemand::object>& jdl,DirectionalLight& directionalLight) {
+    // Direction
+    simdjson::simdjson_result jdl_pos = jdl["Position"].get_array();
+
+    parseVec3(jdl_pos,directionalLight.direction);
+
+    // Properties
+
+    auto properties = jdl["Properties"].get_object();
+    parseIlluminationProperties(properties,directionalLight.properties);
+}
+
 
 
 template <class T>
 void setupIlluminationFromJSON(simdjson::simdjson_result<T>& jill,Scene& scene) {
-    std::cout << "Loading Scene illumination" << std::endl;
 
-    LightProperties lp{};
-    DirectionalLight dl{};
 
-    std::cout << "Setting up Directional Light" << std::endl;
-    simdjson::simdjson_result jdl = jill["DirectionalLight"].get_object();
-
-    // Direction
-    simdjson::simdjson_result jdl_pos = jdl["Position"].get_array();
-
-    parseVec3(jdl_pos,dl.direction);
-    std::cout << "Setting up Directional Light: position" << std::endl;
-
-    // Properties
-    std::cout << "Setting up Directional Light: properties" << std::endl;
-
-    auto properties = jdl["Properties"].get_object();
-    parseIlluminationProperties(properties,dl.properties);
-
-    scene.illumination.directionalLight = dl;
+    try {
+        simdjson::simdjson_result jdl = jill["DirectionalLight"].get_object();
+        DirectionalLight dl{};
+        parseDirectionalLight(jdl,dl);
+        scene.illumination.directionalLight = dl;
+    } catch (std::exception e) {}
 
     // PointLights
-
+    auto jPointLights = jill["PointLights"].get_array();
+    for(auto jPointLight:jPointLights) {
+        auto pointLightObj = jPointLight.get_object();
+        PointLight pl{};
+        parsePointLight(pointLightObj,pl);
+        scene.illumination.pointLights.push_back(pl);
+    }
 }
 
 void parseMaterial(simdjson::simdjson_result<simdjson::ondemand::object>& jobj,Material& mat) {
@@ -151,6 +174,7 @@ void Scene::loadSceneFromJSONFile(std::string jsonPath,Scene& scene) {
         try {
             auto key = std::string(_obj["Key"].get_string().value());
             std::cout << key << std::endl;
+            std::cout << &scene.objects.back() << std::endl;
             scene.objectDOM[key] = &scene.objects.back();
         } catch (std::exception e) {}
     }

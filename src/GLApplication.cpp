@@ -229,6 +229,7 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
     auto shadowProjection = glm::perspective(glm::radians(90.0f), 1.f, 0.1f, 100.0f);
 
     for(auto& obj: renderableScene->objects) {
+        if(state == RenderPass::Final) renderableScene->syncIllumination();
         if( shader != nullptr) obj.swapShaderHandler(shader);
         obj.shaderHandler->useShader();
         obj.shaderHandler->applyMat("model",obj.objectModel(time));
@@ -266,8 +267,8 @@ void GLApplication::renderScene(float time,ShaderHandler* shader,const RenderPas
         }
 
         if(obj.postModelFun) obj.postModel(time,this);
-
         obj.vertexHandler->draw();
+
         if( shader != nullptr) obj.swapShaderHandler();
         glUseProgram(0);
     }

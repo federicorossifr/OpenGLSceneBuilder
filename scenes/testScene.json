@@ -21,8 +21,8 @@
     {
       "Key": "light_cube",
       "Shape": "Cube",
-      "Position": [-10,10,-10],
-      "Side": 2,
+      "Position": [5,5,5],
+      "Side": 0.75,
       "Colour": [1,1,1,1],
       "Textures": [],
       "Material": {
@@ -50,7 +50,7 @@
     }
   ],
   "Illumination" : {
-    "DirectionalLight": {
+    "DirectionalLight_": {
       "Position": [10,-10,10],
       "Properties": {
         "Ambient":[0.5, 0.5, 0.5],
@@ -60,12 +60,15 @@
     },
     "PointLights": [
       {
-        "Position": [1,1,0],
+        "Position": [5,5,5],
         "Properties": {
-          "Ambient":[0.5, 0.5, 0.5],
+          "Ambient":[0.8, 0.8, 0.8],
           "Diffuse":[ 0.7, 0.7, 0.7],
           "Specular":  [1, 1, 1]
-        }
+        },
+        "Constant": 1,
+        "Linear": 0.09,
+        "Quadratic": 0.032
       }
     ],
     "FlashLight": {
