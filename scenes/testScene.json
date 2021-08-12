@@ -3,8 +3,8 @@
     {
       "Key": "central_cube",
       "Shape": "Cube",
-      "Position": [0,2.5,0],
-      "Side": 5,
+      "Position": [0,0.5,0],
+      "Side": 1,
       "Colour": [1,1,1,1],
       "Textures": [
         "../textures/container2.png",
@@ -22,7 +22,7 @@
       "Key": "light_cube",
       "Shape": "Cube",
       "Position": [5,5,5],
-      "Side": 0.75,
+      "Side": 0.5,
       "Colour": [1,1,1,1],
       "Textures": [],
       "Material": {
@@ -36,9 +36,10 @@
     {
       "Shape": "Plane",
       "Position": [0,0,0],
-      "Side": 30,
+      "Side": 10,
       "Colour": [1,1,0,1],
       "Textures": [
+        "../textures/wood.jpg","../textures/wood_specular.jpg"
       ],
       "Material": {
         "Specular": [0.7, 0.7, 0.7],
@@ -62,9 +63,9 @@
       {
         "Position": [5,5,5],
         "Properties": {
-          "Ambient":[0.8, 0.8, 0.8],
-          "Diffuse":[ 0.7, 0.7, 0.7],
-          "Specular":  [1, 1, 1]
+          "Ambient":[0.2, 0.2, 0.2],
+          "Diffuse":[ 0.5, 0.5, 0.5],
+          "Specular":  [0.5, 0.5, 0.5]
         },
         "Constant": 1,
         "Linear": 0.09,
