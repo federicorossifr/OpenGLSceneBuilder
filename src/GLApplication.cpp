@@ -35,7 +35,7 @@ void GLApplication::setupWindow(ApplicationParams& params) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window = glfwCreateWindow(params.screenWidth, params.screenWidth, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(params.screenWidth, params.screenWidth, "glSceneBuilder", NULL, NULL);
     if (window == nullptr)
     {
         std::cout << "Failed to create GLFW window" << std::endl;

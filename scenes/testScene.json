@@ -30,7 +30,7 @@
         "Shininess": 128
       },
       "Shaders": [
-        "shaders/TrianglePos.vert.spv","shaders/Triangle.frag.spv"
+        "shaders/Simple.vert.spv","shaders/Simple.frag.spv"
       ]
     },
     {

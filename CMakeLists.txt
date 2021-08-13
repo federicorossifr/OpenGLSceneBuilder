@@ -14,35 +14,6 @@ else()
 	target_link_libraries(gl_proj PUBLIC glfw GLU)
 endif()
 
-add_executable(main examples/main.cpp examples/test_shader_handler.cpp)
-target_link_libraries(main PUBLIC gl_proj)
-
-add_executable(oth examples/other.cpp)
-target_link_libraries(oth PUBLIC gl_proj)
-
-add_executable(test_handle examples/test_shader_handler.cpp)
-target_link_libraries(test_handle PUBLIC gl_proj)
-
-add_executable(test_glm examples/test_glm.cpp)
-target_link_libraries(test_glm PUBLIC gl_proj)
-
-add_executable(test_encaps_glapp examples/test_encaps_glapp.cpp)
-target_link_libraries(test_encaps_glapp PUBLIC gl_proj)
-
-add_executable(random_cubes examples/randomCubes.cpp)
-target_link_libraries(random_cubes PUBLIC gl_proj)
-
-add_executable(lighting examples/lighting.cpp)
-target_link_libraries(lighting PUBLIC gl_proj)
-
-add_executable(lighting2 examples/lighting2.cpp)
-target_link_libraries(lighting2 PUBLIC gl_proj)
-
-add_executable(multiLighting examples/multiLighting.cpp)
-target_link_libraries(multiLighting PUBLIC gl_proj)
-
-add_executable(shadowMultiLighting examples/shadowMultiLighting.cpp)
-target_link_libraries(shadowMultiLighting PUBLIC gl_proj)
 
 add_executable(sceneTest examples/jsonSceneTest.cpp)
 target_link_libraries(sceneTest PUBLIC gl_proj)
